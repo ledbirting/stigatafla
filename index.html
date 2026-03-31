@@ -54,7 +54,7 @@
     .scoreboard__away-badge {
       position: absolute;
       left: 50%;
-      top: 5%;
+      top: 6%;
       width: 50%;
       height: 50%;
       display: flex;
@@ -64,10 +64,10 @@
     }
 
     .scoreboard__away-badge img {
-      width: 57%;
-      height: 57%;
-      max-width: 59px;
-      max-height: 59px;
+      width: 58%;
+      height: 58%;
+      max-width: 60px;
+      max-height: 60px;
       object-fit: contain;
       display: block;
     }
@@ -265,7 +265,34 @@
   <script>
     (function () {
       var OPPONENTS = [
+        { id: "afturelding", name: "Afturelding", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Afturelding.png" },
+        { id: "breidablik", name: "Breiðablik", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Breidablik.png" },
+        { id: "fh", name: "FH", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/FH.png" },
+        { id: "fjolnir", name: "Fjölnir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fjolnir.png" },
+        { id: "fram", name: "Fram", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fram.png" },
+        { id: "fylkir", name: "Fylkir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fylkir.png" },
+        { id: "grindavik-njardvik", name: "Grindavík/Njarðvík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grindavik-Njardvik.jpg" },
+        { id: "grindavik", name: "Grindavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grindavik.png" },
+        { id: "grotta", name: "Grótta", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grotta.png" },
+        { id: "haukar", name: "Haukar", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Haukar.png" },
+        { id: "hk", name: "HK", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/HK.png" },
+        { id: "ia", name: "ÍA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IA.png" },
+        { id: "ibv", name: "ÍBV", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IBV.png" },
+        { id: "ir", name: "ÍR", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IR.jpg" },
+        { id: "ka", name: "KA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/KA.jpg" },
         { id: "keflavik", name: "Keflavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/keflavik.png" },
+        { id: "leiknir", name: "Leiknir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Leiknir.png" },
+        { id: "njardvik", name: "Njarðvík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Njardvik.jpg" },
+        { id: "selfoss", name: "Selfoss", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Selfoss.png" },
+        { id: "stjarnan", name: "Stjarnan", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Stjarnan.png" },
+        { id: "thor-ka", name: "Þór/KA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Thor-KA.jpg" },
+        { id: "thor", name: "Þór", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Thor.jpg" },
+        { id: "throttur", name: "Þróttur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Throttur.png" },
+        { id: "tindastoll", name: "Tindastóll", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Tindastoll.png" },
+        { id: "valur", name: "Valur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Valur.png" },
+        { id: "vestri", name: "Vestri", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Vestri.png" },
+        { id: "vikingur", name: "Víkingur Reykjavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Vikingur.jpg" },
+        { id: "volsungur", name: "Völsungur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Volsungur.png" },
       ];
 
       var HALF1_END = 45 * 60;
@@ -318,8 +345,16 @@
           opponentSelect.appendChild(opt);
         }
         if (OPPONENTS.length) {
-          opponentSelect.value = OPPONENTS[0].id;
-          awayBadge.src = OPPONENTS[0].badgeUrl;
+          var initial = OPPONENTS[0];
+          for (var j = 0; j < OPPONENTS.length; j++) {
+            if (OPPONENTS[j].id === "keflavik") {
+              initial = OPPONENTS[j];
+              break;
+            }
+          }
+          opponentSelect.value = initial.id;
+          awayBadge.src = initial.badgeUrl;
+          awayBadge.alt = initial.name;
         }
       }
 
