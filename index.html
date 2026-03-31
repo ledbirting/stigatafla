@@ -33,7 +33,7 @@
       height: 100%;
       overflow: hidden;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: flex-start;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--chrome-text);
@@ -49,16 +49,19 @@
       height: min(100vh, 900px);
       max-width: 1800px;
       max-height: 900px;
+      padding-left: 288px;
+      margin: 0;
       overflow: hidden;
     }
     .scoreboard {
-      position: relative;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 288px;
       height: 288px;
       margin: 0;
       padding: 0;
-      flex-shrink: 0;
-      align-self: flex-start;
+      z-index: 10;
       background-color: #222;
       background-image: url("https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Stigatafla-BG.jpg");
       background-size: cover;
