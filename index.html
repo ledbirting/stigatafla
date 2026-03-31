@@ -243,8 +243,13 @@
         </div>
         <div class="controls__row" style="margin-top: 8px">
           <button type="button" class="controls__btn" id="btnStop">Stöðva klukku</button>
+          <button type="button" class="controls__btn controls__btn--primary" id="btnResume">Halda áfram</button>
+        </div>
+        <div class="controls__row" style="margin-top: 8px">
           <button type="button" class="controls__btn" id="btnCalPlus">Jafna +1 sek</button>
           <button type="button" class="controls__btn" id="btnCalMinus">Jafna −1 sek</button>
+          <button type="button" class="controls__btn" id="btnCalPlusMin">Jafna +1 mín</button>
+          <button type="button" class="controls__btn" id="btnCalMinusMin">Jafna −1 mín</button>
         </div>
       </div>
 
@@ -398,6 +403,13 @@
         lastFrameTime = null;
       }
 
+      function resumeClock() {
+        if (running) return;
+        if (matchSeconds >= HALF2_END) return;
+        running = true;
+        lastFrameTime = null;
+      }
+
       function calibrate(delta) {
         matchSeconds = clampSeconds(matchSeconds + delta);
         renderClock();
@@ -431,8 +443,11 @@
       document.getElementById("btnFirstHalf").addEventListener("click", startFirstHalf);
       document.getElementById("btnSecondHalf").addEventListener("click", startSecondHalf);
       document.getElementById("btnStop").addEventListener("click", stopClock);
+      document.getElementById("btnResume").addEventListener("click", resumeClock);
       document.getElementById("btnCalPlus").addEventListener("click", function () { calibrate(1); });
       document.getElementById("btnCalMinus").addEventListener("click", function () { calibrate(-1); });
+      document.getElementById("btnCalPlusMin").addEventListener("click", function () { calibrate(60); });
+      document.getElementById("btnCalMinusMin").addEventListener("click", function () { calibrate(-60); });
 
       document.getElementById("btnHomePlus").addEventListener("click", function () {
         homeScore += 1;
