@@ -9,12 +9,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-subtle: #f5f5f7;
-      --border: rgba(0, 0, 0, 0.08);
-      --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
-      --radius: 12px;
-      --text: #1d1d1f;
-      --accent: #007aff;
+      --chrome-bg: #0a0a0c;
+      --chrome-bg-elevated: #141416;
+      --chrome-card: #1c1c1f;
+      --chrome-border: rgba(255, 255, 255, 0.08);
+      --chrome-border-strong: rgba(255, 255, 255, 0.14);
+      --chrome-text: #f5f5f7;
+      --chrome-muted: #98989d;
+      --chrome-hint: #636366;
+      --accent: #0a84ff;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45);
     }
 
     * {
@@ -25,9 +31,10 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      font-family: "Inter", system-ui, -apple-system, sans-serif;
-      color: var(--text);
-      background: var(--bg-subtle);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--chrome-text);
+      background: var(--chrome-bg);
+      -webkit-font-smoothing: antialiased;
     }
 
     .app {
@@ -35,6 +42,20 @@
       flex-wrap: wrap;
       align-items: flex-start;
       gap: 0;
+      min-height: 100vh;
+    }
+
+    .controls-shell {
+      flex: 1;
+      min-width: min(100%, 320px);
+      padding: 20px 22px 28px;
+      background: linear-gradient(180deg, var(--chrome-bg) 0%, #070708 100%);
+    }
+
+    @media (min-width: 720px) {
+      .controls-shell {
+        padding: 28px 32px 40px 28px;
+      }
     }
 
     .scoreboard {
@@ -119,59 +140,111 @@
     }
 
     .controls {
-      flex: 1;
-      min-width: 260px;
-      max-width: 420px;
-      margin: 20px 24px 24px 20px;
-      padding: 20px 22px;
-      background: #fff;
-      border: 1px solid var(--border);
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    .controls__title {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--chrome-text);
+    }
+
+    .controls__lead {
+      margin: 0 0 22px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--chrome-muted);
+    }
+
+    .controls__card {
+      background: var(--chrome-card);
+      border: 1px solid var(--chrome-border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      padding: 18px 18px 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-card);
     }
 
-    .controls h2 {
-      margin: 0 0 16px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: #86868b;
-      text-transform: uppercase;
-    }
-
-    .controls__group {
-      margin-bottom: 20px;
-    }
-
-    .controls__group:last-child {
+    .controls__card:last-child {
       margin-bottom: 0;
     }
 
-    .controls__row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+    .controls h2 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--chrome-muted);
+      text-transform: uppercase;
     }
 
-    .controls label {
+    .controls__hint {
+      margin: 0 0 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--chrome-hint);
+    }
+
+    .controls__hint strong {
+      color: var(--chrome-muted);
+      font-weight: 600;
+    }
+
+    .controls__subhead {
+      margin: 16px 0 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--chrome-hint);
+    }
+
+    .controls__subhead:first-child {
+      margin-top: 0;
+    }
+
+    .controls__divider {
+      height: 1px;
+      background: var(--chrome-border);
+      margin: 16px 0;
+      border: 0;
+    }
+
+    .controls label.controls__label {
       display: block;
       font-size: 12px;
-      font-weight: 600;
-      color: #515154;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--chrome-muted);
       margin-bottom: 8px;
     }
 
     select.controls__select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 14px 14px;
       font-family: inherit;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--text);
-      margin-bottom: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      border: 1px solid var(--chrome-border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--chrome-bg-elevated);
+      color: var(--chrome-text);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2398989d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      touch-action: manipulation;
+    }
+
+    select.controls__select:hover {
+      border-color: rgba(255, 255, 255, 0.22);
     }
 
     select.controls__select:focus-visible {
@@ -179,23 +252,47 @@
       outline-offset: 2px;
     }
 
+    .controls__grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 380px) {
+      .controls__grid2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .controls__grid-cal {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
     button.controls__btn {
       font-family: inherit;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
-      padding: 9px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
+      padding: 12px 16px;
+      min-height: 48px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--chrome-border-strong);
+      background: var(--chrome-bg-elevated);
+      color: var(--chrome-text);
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-      transition: background 0.15s ease, border-color 0.15s ease;
+      touch-action: manipulation;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button.controls__btn:active {
+      transform: scale(0.98);
     }
 
     button.controls__btn:hover {
-      background: #fafafa;
-      border-color: rgba(0, 0, 0, 0.12);
+      background: #252528;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     button.controls__btn:focus-visible {
@@ -203,18 +300,149 @@
       outline-offset: 2px;
     }
 
-    button.controls__btn--primary {
-      background: var(--accent);
-      border-color: transparent;
-      color: #fff;
+    button.controls__btn--block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 56px;
+      text-align: center;
+      line-height: 1.25;
+      padding: 12px 14px;
     }
 
-    button.controls__btn--primary:hover {
-      background: #0066d6;
+    button.controls__btn--go {
+      background: rgba(50, 215, 75, 0.14);
+      border-color: rgba(50, 215, 75, 0.45);
+      color: #5be27a;
     }
 
-    button.controls__btn--destructive {
-      color: #c41e1e;
+    button.controls__btn--go:hover {
+      background: rgba(50, 215, 75, 0.22);
+      border-color: rgba(50, 215, 75, 0.6);
+    }
+
+    .controls__btn-sub {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      opacity: 0.88;
+    }
+
+    button.controls__btn--go .controls__btn-sub {
+      color: #8ee4a0;
+    }
+
+    button.controls__btn--pause .controls__btn-sub {
+      color: #ffb3ae;
+      font-weight: 500;
+    }
+
+    button.controls__btn--resume .controls__btn-sub {
+      color: #8ec5ff;
+    }
+
+    button.controls__btn--pause {
+      background: rgba(255, 69, 58, 0.12);
+      border-color: rgba(255, 69, 58, 0.4);
+      color: #ff8a83;
+    }
+
+    button.controls__btn--pause:hover {
+      background: rgba(255, 69, 58, 0.2);
+      border-color: rgba(255, 69, 58, 0.55);
+    }
+
+    button.controls__btn--resume {
+      background: rgba(10, 132, 255, 0.16);
+      border-color: rgba(10, 132, 255, 0.45);
+      color: #64b4ff;
+    }
+
+    button.controls__btn--resume:hover {
+      background: rgba(10, 132, 255, 0.24);
+      border-color: rgba(10, 132, 255, 0.6);
+    }
+
+    button.controls__btn--cal {
+      min-height: 44px;
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+
+    button.controls__btn--goal-plus {
+      min-height: 52px;
+      font-size: 15px;
+      font-weight: 700;
+      background: rgba(50, 215, 75, 0.12);
+      border-color: rgba(50, 215, 75, 0.35);
+      color: #5be27a;
+    }
+
+    button.controls__btn--goal-plus:hover {
+      background: rgba(50, 215, 75, 0.2);
+      border-color: rgba(50, 215, 75, 0.5);
+    }
+
+    button.controls__btn--goal-minus {
+      min-height: 44px;
+      font-size: 13px;
+      color: #ff8a83;
+      border-color: rgba(255, 69, 58, 0.28);
+      background: rgba(255, 69, 58, 0.08);
+    }
+
+    button.controls__btn--goal-minus:hover {
+      background: rgba(255, 69, 58, 0.15);
+      border-color: rgba(255, 69, 58, 0.42);
+    }
+
+    .controls__goal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 380px) {
+      .controls__goal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .controls__goal-box {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--chrome-bg-elevated);
+      border: 1px solid var(--chrome-border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .controls__goal-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--chrome-hint);
+      margin: 0;
+    }
+
+    .controls__goal-where {
+      margin: 0 0 2px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--chrome-text);
+    }
+
+    .controls__goal-meta {
+      margin: 0 0 4px;
+      font-size: 12px;
+      color: var(--chrome-hint);
+      line-height: 1.35;
     }
   </style>
 </head>
@@ -229,40 +457,71 @@
       <div class="scoreboard__clock" id="clockEl" aria-live="polite">00:00</div>
     </div>
 
-    <div class="controls">
-      <div class="controls__group">
-        <label for="opponentSelect">Andstæðingur</label>
-        <select id="opponentSelect" class="controls__select"></select>
-      </div>
+    <div class="controls-shell">
+      <div class="controls">
+        <h1 class="controls__title">Stjórnborð</h1>
+        <p class="controls__lead">Stór hnappar = tími og mörk. <strong>Stöðva</strong> er pása. <strong>Halda áfram</strong> heldur tímanum óbreyttum. Engin viðbótartími á klukkunni.</p>
 
-      <div class="controls__group">
-        <h2>Klukka</h2>
-        <div class="controls__row">
-          <button type="button" class="controls__btn controls__btn--primary" id="btnFirstHalf">Byrja 1. hálfleik (0–45)</button>
-          <button type="button" class="controls__btn controls__btn--primary" id="btnSecondHalf">Byrja 2. hálfleik (45–90)</button>
-        </div>
-        <div class="controls__row" style="margin-top: 8px">
-          <button type="button" class="controls__btn" id="btnStop">Stöðva klukku</button>
-          <button type="button" class="controls__btn controls__btn--primary" id="btnResume">Halda áfram</button>
-        </div>
-        <div class="controls__row" style="margin-top: 8px">
-          <button type="button" class="controls__btn" id="btnCalPlus">Jafna +1 sek</button>
-          <button type="button" class="controls__btn" id="btnCalMinus">Jafna −1 sek</button>
-          <button type="button" class="controls__btn" id="btnCalPlusMin">Jafna +1 mín</button>
-          <button type="button" class="controls__btn" id="btnCalMinusMin">Jafna −1 mín</button>
-        </div>
-      </div>
+        <section class="controls__card" aria-labelledby="opp-heading">
+          <h2 id="opp-heading">Andstæðingur</h2>
+          <p class="controls__hint">Veldu liðið sem leikur gegn heimaliði. Merkið birtist <strong>sem næst hægra megin</strong> á borðinu (KR er þegar á myndinni).</p>
+          <label class="controls__label" for="opponentSelect">Lið</label>
+          <select id="opponentSelect" class="controls__select"></select>
+        </section>
 
-      <div class="controls__group">
-        <h2>Mörk</h2>
-        <div class="controls__row">
-          <button type="button" class="controls__btn" id="btnHomePlus">Heimalið +1</button>
-          <button type="button" class="controls__btn controls__btn--destructive" id="btnHomeMinus">Heimalið −1</button>
-        </div>
-        <div class="controls__row" style="margin-top: 8px">
-          <button type="button" class="controls__btn" id="btnAwayPlus">Útilið +1</button>
-          <button type="button" class="controls__btn controls__btn--destructive" id="btnAwayMinus">Útilið −1</button>
-        </div>
+        <section class="controls__card" aria-labelledby="clock-heading">
+          <h2 id="clock-heading">Léttími</h2>
+          <p class="controls__hint">Ýttu á <strong>græna hnapp</strong> til að byrja hálfuna. Klukkan kyrrar sjálfkrafa á <strong>45:00</strong> og <strong>90:00</strong>.</p>
+
+          <div class="controls__grid2">
+            <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnFirstHalf">
+              Byrja 1. hálfleik
+              <span class="controls__btn-sub">0:00 → 45:00</span>
+            </button>
+            <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnSecondHalf">
+              Byrja 2. hálfleik
+              <span class="controls__btn-sub">45:00 → 90:00</span>
+            </button>
+          </div>
+
+          <hr class="controls__divider" />
+
+          <div class="controls__grid2">
+            <button type="button" class="controls__btn controls__btn--block controls__btn--pause" id="btnStop">Stöðva tímann<span class="controls__btn-sub">pása — breytir ekki tímanum</span></button>
+            <button type="button" class="controls__btn controls__btn--block controls__btn--resume" id="btnResume">Halda áfram<span class="controls__btn-sub">áfram í sömu stöðu</span></button>
+          </div>
+
+          <p class="controls__subhead">Leiðrétta tíma (ef klikk)</p>
+          <p class="controls__hint" style="margin-bottom:10px">Smá færsla — breytir ekki hálfunni, bara sýndinni.</p>
+          <div class="controls__grid-cal">
+            <button type="button" class="controls__btn controls__btn--cal" id="btnCalMinusMin">−1 mín</button>
+            <button type="button" class="controls__btn controls__btn--cal" id="btnCalPlusMin">+1 mín</button>
+            <button type="button" class="controls__btn controls__btn--cal" id="btnCalMinus">−1 sek</button>
+            <button type="button" class="controls__btn controls__btn--cal" id="btnCalPlus">+1 sek</button>
+          </div>
+        </section>
+
+        <section class="controls__card" aria-labelledby="goals-heading">
+          <h2 id="goals-heading">Mörk</h2>
+          <p class="controls__hint">Talan <strong>vinstra megin</strong> er heimalið, <strong>hægra megin</strong> er útilið — eins og á 288×288 borðinu.</p>
+
+          <div class="controls__goal-grid">
+            <div class="controls__goal-box">
+              <p class="controls__goal-tag">Heimalið</p>
+              <p class="controls__goal-where">Stig vinstri</p>
+              <p class="controls__goal-meta">KR á myndinni</p>
+              <button type="button" class="controls__btn controls__btn--goal-plus" id="btnHomePlus">+1 mark</button>
+              <button type="button" class="controls__btn controls__btn--goal-minus" id="btnHomeMinus">−1 mark (ef hönd)</button>
+            </div>
+            <div class="controls__goal-box">
+              <p class="controls__goal-tag">Útilið</p>
+              <p class="controls__goal-where">Stig hægri</p>
+              <p class="controls__goal-meta">Merki úr valinu hér að ofan</p>
+              <button type="button" class="controls__btn controls__btn--goal-plus" id="btnAwayPlus">+1 mark</button>
+              <button type="button" class="controls__btn controls__btn--goal-minus" id="btnAwayMinus">−1 mark (ef rangt smellt)</button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
