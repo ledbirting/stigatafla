@@ -23,10 +23,18 @@
       --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45);
     }
     * { box-sizing: border-box; }
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
     body {
       margin: 0;
       padding: 0;
-      min-height: 100vh;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--chrome-text);
       background: var(--chrome-bg);
@@ -34,10 +42,14 @@
     }
     .app {
       display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 0;
-      min-height: 100vh;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      width: min(100vw, 1800px);
+      height: min(100vh, 900px);
+      max-width: 1800px;
+      max-height: 900px;
+      overflow: hidden;
     }
     .scoreboard {
       position: relative;
@@ -46,6 +58,7 @@
       margin: 0;
       padding: 0;
       flex-shrink: 0;
+      align-self: flex-start;
       background-color: #222;
       background-image: url("https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Stigatafla-BG.jpg");
       background-size: cover;
@@ -111,42 +124,61 @@
     }
     .controls-shell {
       flex: 1;
-      min-width: min(100%, 320px);
-      padding: 20px 22px 28px;
+      min-width: 0;
+      min-height: 0;
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       background: linear-gradient(180deg, var(--chrome-bg) 0%, #070708 100%);
     }
-    @media (min-width: 720px) {
-      .controls-shell { padding: 28px 32px 40px 28px; }
-    }
     .controls {
-      max-width: 440px;
-      margin: 0 auto;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       padding: 0;
+      overflow: hidden;
     }
-    .controls__title { margin: 0 0 6px; font-size: 22px; font-weight: 700; letter-spacing: -0.03em; color: var(--chrome-text); }
-    .controls__lead { margin: 0 0 22px; font-size: 14px; line-height: 1.45; color: var(--chrome-muted); }
+    .controls__title { margin: 0 0 4px; font-size: 20px; font-weight: 700; letter-spacing: -0.03em; color: var(--chrome-text); }
+    .controls__lead { margin: 0 0 10px; font-size: 12px; line-height: 1.4; color: var(--chrome-muted); flex-shrink: 0; }
+    .controls__cards {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 10px;
+      overflow: hidden;
+    }
     .controls__card {
+      flex: 1;
+      min-width: 0;
       background: var(--chrome-card);
       border: 1px solid var(--chrome-border);
       border-radius: var(--radius);
-      padding: 18px 18px 20px;
-      margin-bottom: 14px;
+      padding: 12px 12px 14px;
+      margin-bottom: 0;
       box-shadow: var(--shadow-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-    .controls__card:last-child { margin-bottom: 0; }
     .controls h2 {
-      margin: 0 0 6px;
-      font-size: 12px;
+      margin: 0 0 4px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.06em;
       color: var(--chrome-muted);
       text-transform: uppercase;
+      flex-shrink: 0;
     }
-    .controls__hint { margin: 0 0 14px; font-size: 13px; line-height: 1.4; color: var(--chrome-hint); }
+    .controls__hint { margin: 0 0 8px; font-size: 11px; line-height: 1.35; color: var(--chrome-hint); }
     .controls__hint strong { color: var(--chrome-muted); font-weight: 600; }
-    .controls__subhead { margin: 16px 0 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--chrome-hint); }
+    .controls__subhead { margin: 10px 0 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--chrome-hint); }
     .controls__subhead:first-child { margin-top: 0; }
-    .controls__divider { height: 1px; background: var(--chrome-border); margin: 16px 0; border: 0; }
+    .controls__divider { height: 1px; background: var(--chrome-border); margin: 10px 0; border: 0; flex-shrink: 0; }
     .controls label.controls__label {
       display: block;
       font-size: 12px;
@@ -158,9 +190,9 @@
     }
     select.controls__select {
       width: 100%;
-      padding: 14px 14px;
+      padding: 10px 12px;
       font-family: inherit;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       border: 1px solid var(--chrome-border-strong);
       border-radius: var(--radius-sm);
@@ -171,22 +203,19 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2398989d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
-      padding-right: 40px;
+      padding-right: 32px;
       touch-action: manipulation;
     }
     select.controls__select:hover { border-color: rgba(255, 255, 255, 0.22); }
     select.controls__select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .controls__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media (max-width: 380px) {
-      .controls__grid2 { grid-template-columns: 1fr; }
-    }
-    .controls__grid-cal { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .controls__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
+    .controls__grid-cal { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
     button.controls__btn {
       font-family: inherit;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
-      padding: 12px 16px;
-      min-height: 48px;
+      padding: 8px 10px;
+      min-height: 40px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--chrome-border-strong);
       background: var(--chrome-bg-elevated);
@@ -205,10 +234,10 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      min-height: 56px;
+      min-height: 46px;
       text-align: center;
-      line-height: 1.25;
-      padding: 12px 14px;
+      line-height: 1.2;
+      padding: 8px 8px;
     }
     button.controls__btn--go {
       background: rgba(50, 215, 75, 0.14);
@@ -221,8 +250,8 @@
     }
     .controls__btn-sub {
       display: block;
-      margin-top: 4px;
-      font-size: 12px;
+      margin-top: 2px;
+      font-size: 10px;
       font-weight: 500;
       line-height: 1.3;
       opacity: 0.88;
@@ -248,10 +277,10 @@
       background: rgba(10, 132, 255, 0.24);
       border-color: rgba(10, 132, 255, 0.6);
     }
-    button.controls__btn--cal { min-height: 44px; font-size: 13px; padding: 10px 12px; }
+    button.controls__btn--cal { min-height: 36px; font-size: 11px; padding: 6px 8px; }
     button.controls__btn--goal-plus {
-      min-height: 52px;
-      font-size: 15px;
+      min-height: 40px;
+      font-size: 13px;
       font-weight: 700;
       background: rgba(50, 215, 75, 0.12);
       border-color: rgba(50, 215, 75, 0.35);
@@ -262,8 +291,8 @@
       border-color: rgba(50, 215, 75, 0.5);
     }
     button.controls__btn--goal-minus {
-      min-height: 44px;
-      font-size: 13px;
+      min-height: 36px;
+      font-size: 11px;
       color: #ff8a83;
       border-color: rgba(255, 69, 58, 0.28);
       background: rgba(255, 69, 58, 0.08);
@@ -272,12 +301,12 @@
       background: rgba(255, 69, 58, 0.15);
       border-color: rgba(255, 69, 58, 0.42);
     }
-    .controls__goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 380px) {
+    .controls__goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; min-height: 0; align-content: start; }
+    @media (max-width: 1200px) {
       .controls__goal-grid { grid-template-columns: 1fr; }
     }
     .controls__goal-box {
-      padding: 12px;
+      padding: 8px;
       border-radius: var(--radius-sm);
       background: var(--chrome-bg-elevated);
       border: 1px solid var(--chrome-border);
@@ -293,7 +322,7 @@
       color: var(--chrome-hint);
       margin: 0;
     }
-    .controls__goal-where { margin: 0 0 2px; font-size: 15px; font-weight: 700; color: var(--chrome-text); }
+    .controls__goal-where { margin: 0 0 2px; font-size: 13px; font-weight: 700; color: var(--chrome-text); }
     .controls__goal-meta { margin: 0 0 4px; font-size: 12px; color: var(--chrome-hint); line-height: 1.35; }
   </style>
 </head>
@@ -313,6 +342,7 @@
         <h1 class="controls__title">Stjórnborð</h1>
         <p class="controls__lead">Stór hnappar = tími og mörk. <strong>Stöðva</strong> er pása. <strong>Halda áfram</strong> heldur tímanum óbreyttum. Engin viðbótartími á klukkunni.</p>
 
+        <div class="controls__cards">
         <section class="controls__card" aria-labelledby="opp-heading">
           <h2 id="opp-heading">Andstæðingur</h2>
           <p class="controls__hint">Veldu liðið sem leikur gegn heimaliði. Merkið birtist <strong>sem næst hægra megin</strong> á borðinu (KR er þegar á myndinni).</p>
@@ -368,6 +398,7 @@
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   </div>
