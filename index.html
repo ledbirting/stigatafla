@@ -1,1 +1,420 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stigatafla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-subtle: #f5f5f7;
+      --border: rgba(0, 0, 0, 0.08);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+      --radius: 12px;
+      --text: #1d1d1f;
+      --accent: #007aff;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg-subtle);
+      padding: 24px;
+    }
+
+    .app {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 28px;
+    }
+
+    .scoreboard {
+      position: relative;
+      width: 288px;
+      height: 288px;
+      flex-shrink: 0;
+      background-color: #222;
+      background-image: url("https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Stigatafla-BG.jpg");
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .scoreboard__away-badge {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 50%;
+      height: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .scoreboard__away-badge img {
+      width: 76%;
+      height: 76%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .scoreboard__score {
+      position: absolute;
+      top: 36%;
+      width: 50%;
+      height: 44%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Inter", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 76px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .scoreboard__score--away {
+      left: 0;
+    }
+
+    .scoreboard__score--home {
+      left: 50%;
+    }
+
+    .scoreboard__clock {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: 0;
+      height: 20%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Inter", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: #000000;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .controls {
+      flex: 1;
+      min-width: 260px;
+      max-width: 420px;
+      padding: 20px 22px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .controls h2 {
+      margin: 0 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #86868b;
+      text-transform: uppercase;
+    }
+
+    .controls__group {
+      margin-bottom: 20px;
+    }
+
+    .controls__group:last-child {
+      margin-bottom: 0;
+    }
+
+    .controls__row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .controls label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #515154;
+      margin-bottom: 8px;
+    }
+
+    select.controls__select {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    select.controls__select:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    button.controls__btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    button.controls__btn:hover {
+      background: #fafafa;
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    button.controls__btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    button.controls__btn--primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    button.controls__btn--primary:hover {
+      background: #0066d6;
+    }
+
+    button.controls__btn--destructive {
+      color: #c41e1e;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="scoreboard" aria-label="Stigatafla">
+      <div class="scoreboard__away-badge">
+        <img id="awayBadge" src="https://media.zapp.is/storage/v1/object/public/ledbirting-efni/keflavik.png" alt="" />
+      </div>
+      <div class="scoreboard__score scoreboard__score--away" id="awayScoreEl" aria-live="polite">0</div>
+      <div class="scoreboard__score scoreboard__score--home" id="homeScoreEl" aria-live="polite">0</div>
+      <div class="scoreboard__clock" id="clockEl" aria-live="polite">00:00</div>
+    </div>
+
+    <div class="controls">
+      <div class="controls__group">
+        <label for="opponentSelect">Andstæðingur</label>
+        <select id="opponentSelect" class="controls__select"></select>
+      </div>
+
+      <div class="controls__group">
+        <h2>Klukka</h2>
+        <div class="controls__row">
+          <button type="button" class="controls__btn controls__btn--primary" id="btnFirstHalf">Byrja 1. hálfleik (0–45)</button>
+          <button type="button" class="controls__btn controls__btn--primary" id="btnSecondHalf">Byrja 2. hálfleik (45–90)</button>
+        </div>
+        <div class="controls__row" style="margin-top: 8px">
+          <button type="button" class="controls__btn" id="btnStop">Stöðva klukku</button>
+          <button type="button" class="controls__btn" id="btnCalPlus">Jafna +1 sek</button>
+          <button type="button" class="controls__btn" id="btnCalMinus">Jafna −1 sek</button>
+        </div>
+      </div>
+
+      <div class="controls__group">
+        <h2>Mörk</h2>
+        <div class="controls__row">
+          <button type="button" class="controls__btn" id="btnHomePlus">Heimalið +1</button>
+          <button type="button" class="controls__btn controls__btn--destructive" id="btnHomeMinus">Heimalið −1</button>
+        </div>
+        <div class="controls__row" style="margin-top: 8px">
+          <button type="button" class="controls__btn" id="btnAwayPlus">Útilið +1</button>
+          <button type="button" class="controls__btn controls__btn--destructive" id="btnAwayMinus">Útilið −1</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var OPPONENTS = [
+        { id: "keflavik", name: "Keflavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/keflavik.png" },
+      ];
+
+      var HALF1_END = 45 * 60;
+      var HALF2_END = 90 * 60;
+      var MAX_SEC = HALF2_END;
+
+      var matchSeconds = 0;
+      var half = 1;
+      var running = false;
+      var lastFrameTime = null;
+
+      var homeScore = 0;
+      var awayScore = 0;
+
+      var awayBadge = document.getElementById("awayBadge");
+      var awayScoreEl = document.getElementById("awayScoreEl");
+      var homeScoreEl = document.getElementById("homeScoreEl");
+      var clockEl = document.getElementById("clockEl");
+      var opponentSelect = document.getElementById("opponentSelect");
+
+      function clampSeconds(s) {
+        if (s < 0) return 0;
+        if (s > MAX_SEC) return MAX_SEC;
+        return s;
+      }
+
+      function formatClock(totalSec) {
+        var s = Math.floor(totalSec);
+        var mm = Math.floor(s / 60);
+        var ss = s % 60;
+        return String(mm).padStart(2, "0") + ":" + String(ss).padStart(2, "0");
+      }
+
+      function renderClock() {
+        clockEl.textContent = formatClock(matchSeconds);
+      }
+
+      function renderScores() {
+        awayScoreEl.textContent = String(awayScore);
+        homeScoreEl.textContent = String(homeScore);
+      }
+
+      function syncOpponentUi() {
+        opponentSelect.innerHTML = "";
+        for (var i = 0; i < OPPONENTS.length; i++) {
+          var o = OPPONENTS[i];
+          var opt = document.createElement("option");
+          opt.value = o.id;
+          opt.textContent = o.name;
+          opponentSelect.appendChild(opt);
+        }
+        if (OPPONENTS.length) {
+          opponentSelect.value = OPPONENTS[0].id;
+          awayBadge.src = OPPONENTS[0].badgeUrl;
+        }
+      }
+
+      opponentSelect.addEventListener("change", function () {
+        var id = opponentSelect.value;
+        for (var i = 0; i < OPPONENTS.length; i++) {
+          if (OPPONENTS[i].id === id) {
+            awayBadge.src = OPPONENTS[i].badgeUrl;
+            awayBadge.alt = OPPONENTS[i].name;
+            return;
+          }
+        }
+      });
+
+      function startFirstHalf() {
+        if (!running && half === 1 && matchSeconds > 0 && matchSeconds < HALF1_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = 0;
+        half = 1;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function startSecondHalf() {
+        if (!running && half === 2 && matchSeconds >= HALF1_END && matchSeconds < HALF2_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = HALF1_END;
+        half = 2;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function stopClock() {
+        running = false;
+        lastFrameTime = null;
+      }
+
+      function calibrate(delta) {
+        matchSeconds = clampSeconds(matchSeconds + delta);
+        renderClock();
+      }
+
+      function frame(now) {
+        if (running) {
+          if (lastFrameTime != null) {
+            var dt = (now - lastFrameTime) / 1000;
+            matchSeconds += dt;
+            if (half === 1 && matchSeconds >= HALF1_END) {
+              matchSeconds = HALF1_END;
+              running = false;
+            } else if (half === 2 && matchSeconds >= HALF2_END) {
+              matchSeconds = HALF2_END;
+              running = false;
+            }
+          }
+          if (running) {
+            lastFrameTime = now;
+          } else {
+            lastFrameTime = null;
+          }
+        } else {
+          lastFrameTime = null;
+        }
+        renderClock();
+        requestAnimationFrame(frame);
+      }
+
+      document.getElementById("btnFirstHalf").addEventListener("click", startFirstHalf);
+      document.getElementById("btnSecondHalf").addEventListener("click", startSecondHalf);
+      document.getElementById("btnStop").addEventListener("click", stopClock);
+      document.getElementById("btnCalPlus").addEventListener("click", function () { calibrate(1); });
+      document.getElementById("btnCalMinus").addEventListener("click", function () { calibrate(-1); });
+
+      document.getElementById("btnHomePlus").addEventListener("click", function () {
+        homeScore += 1;
+        renderScores();
+      });
+      document.getElementById("btnHomeMinus").addEventListener("click", function () {
+        homeScore = Math.max(0, homeScore - 1);
+        renderScores();
+      });
+      document.getElementById("btnAwayPlus").addEventListener("click", function () {
+        awayScore += 1;
+        renderScores();
+      });
+      document.getElementById("btnAwayMinus").addEventListener("click", function () {
+        awayScore = Math.max(0, awayScore - 1);
+        renderScores();
+      });
+
+      syncOpponentUi();
+      renderClock();
+      renderScores();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
