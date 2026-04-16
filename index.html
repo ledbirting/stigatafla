@@ -45,35 +45,34 @@
       flex-direction: row;
       flex-wrap: nowrap;
       align-items: stretch;
-      width: min(100vw, 1800px);
-      height: min(100vh, 900px);
-      max-width: 1800px;
-      max-height: 900px;
-      padding-left: 864px;
+      width: min(100vw, 2600px);
+      height: min(100vh, 1100px);
+      max-width: 2600px;
+      max-height: 1100px;
+      padding-left: 1152px;
       margin: 0;
       overflow: hidden;
     }
     .scoreboard {
-      /* Pixel guides (864×576): center score 358×176 @ (253,202); clock 308×92 @ (278,378);
-         badges 207×206 @ left 46 / right 46, top 185 (between 185px top/bottom bands). */
-      --sb-badge-x: 46px;
-      --sb-badge-y: 185px;
-      --sb-badge-w: 207px;
-      --sb-badge-h: 206px;
-      --sb-score-x: 253px;
-      --sb-score-y: 202px;
-      --sb-score-w: 358px;
-      --sb-score-h: 176px;
-      --sb-score-colon-gap: 42px;
-      --sb-clock-x: 278px;
-      --sb-clock-y: 400px;
-      --sb-clock-w: 308px;
-      --sb-clock-h: 92px;
+      /* Layout scaled 4/3 from 864×576 guides → 1152×768. */
+      --sb-badge-x: 61.3333333333px;
+      --sb-badge-y: 246.6666666667px;
+      --sb-badge-w: 276px;
+      --sb-badge-h: 274.6666666667px;
+      --sb-score-x: 337.3333333333px;
+      --sb-score-y: 269.3333333333px;
+      --sb-score-w: 477.3333333333px;
+      --sb-score-h: 234.6666666667px;
+      --sb-score-colon-gap: 56px;
+      --sb-clock-x: 370.6666666667px;
+      --sb-clock-y: 533.3333333333px;
+      --sb-clock-w: 410.6666666667px;
+      --sb-clock-h: 122.6666666667px;
       position: fixed;
       top: 0;
       left: 0;
-      width: 864px;
-      height: 576px;
+      width: 1152px;
+      height: 768px;
       margin: 0;
       padding: 0;
       z-index: 10;
@@ -125,7 +124,7 @@
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      padding: 0 12px;
+      padding: 0 16px;
       box-sizing: border-box;
       background: transparent;
     }
@@ -134,7 +133,7 @@
       min-width: 0;
       font-family: "Inter", system-ui, sans-serif;
       font-weight: 900;
-      font-size: 112px;
+      font-size: 149.3333333333px;
       line-height: 1;
       letter-spacing: -0.04em;
       color: #ffffff;
@@ -159,12 +158,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 12px;
+      padding: 0 16px;
       box-sizing: border-box;
       background: transparent;
       font-family: "Inter", system-ui, sans-serif;
       font-weight: 800;
-      font-size: 64px;
+      font-size: 85.3333333333px;
       line-height: 1;
       letter-spacing: 0.02em;
       color: #0a0a0a;
@@ -189,7 +188,6 @@
       overflow: hidden;
     }
     .controls__title { margin: 0 0 4px; font-size: 20px; font-weight: 700; letter-spacing: -0.03em; color: var(--chrome-text); }
-    .controls__lead { margin: 0 0 10px; font-size: 12px; line-height: 1.4; color: var(--chrome-muted); flex-shrink: 0; }
     .controls__cards {
       flex: 1;
       min-height: 0;
@@ -225,8 +223,6 @@
       text-transform: uppercase;
       flex-shrink: 0;
     }
-    .controls__hint { margin: 0 0 8px; font-size: 18px; line-height: 1.35; color: var(--chrome-hint); }
-    .controls__hint strong { color: var(--chrome-muted); font-weight: 600; }
     .controls__subhead { margin: 10px 0 6px; font-size: 16px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--chrome-hint); }
     .controls__subhead:first-child { margin-top: 0; }
     .controls__divider { height: 1px; background: var(--chrome-border); margin: 10px 0; border: 0; flex-shrink: 0; }
@@ -373,8 +369,6 @@
       color: var(--chrome-hint);
       margin: 0;
     }
-    .controls__goal-where { margin: 0 0 2px; font-size: 21px; font-weight: 700; color: var(--chrome-text); }
-    .controls__goal-meta { margin: 0 0 4px; font-size: 20px; color: var(--chrome-hint); line-height: 1.35; }
   </style>
 </head>
 <body>
@@ -404,7 +398,6 @@
         <div class="controls__cards">
         <section class="controls__card" aria-labelledby="match-heading">
           <h2 id="match-heading">Leikur</h2>
-          <p class="controls__hint">Bakgrunnur eftir mótshátt (reitir, svæði og tvípunktur í stigasvæði eru í myndinni). Merki og tölur eru lagðar ofan á fasta gröfina.</p>
           <label class="controls__label" for="tournamentSelect">Mót / bakgrunnur</label>
           <select id="tournamentSelect" class="controls__select"></select>
           <label class="controls__label" for="homeTeamSelect">Heimalið</label>
@@ -415,7 +408,6 @@
 
         <section class="controls__card" aria-labelledby="clock-heading">
           <h2 id="clock-heading">Klukka</h2>
-          <p class="controls__hint">Ýttu á grænu takkanna til að byrja hálfleiki. Klukka stoppar sjálfkrafa á 45:00 og 90:00. Klukka fer í gang um leið og smellt er á takka.</p>
           <div class="controls__grid2">
             <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnFirstHalf">
               Byrja 1. hálfleik
@@ -442,19 +434,14 @@
 
         <section class="controls__card" aria-labelledby="goals-heading">
           <h2 id="goals-heading">Mörk</h2>
-          <p class="controls__hint">Talan <strong>vinstra megin</strong> við tvípunkt er heimalið, <strong>hægra megin</strong> er útilið.</p>
           <div class="controls__goal-grid">
             <div class="controls__goal-box">
               <p class="controls__goal-tag">Heimalið</p>
-              <p class="controls__goal-where">Stig vinstri</p>
-              <p class="controls__goal-meta">Merki úr „Heimalið“</p>
               <button type="button" class="controls__btn controls__btn--goal-plus" id="btnHomePlus">+1 mark</button>
               <button type="button" class="controls__btn controls__btn--goal-minus" id="btnHomeMinus">−1 mark</button>
             </div>
             <div class="controls__goal-box">
               <p class="controls__goal-tag">Útilið</p>
-              <p class="controls__goal-where">Stig hægri</p>
-              <p class="controls__goal-meta">Merki úr „Útilið“</p>
               <button type="button" class="controls__btn controls__btn--goal-plus" id="btnAwayPlus">+1 mark</button>
               <button type="button" class="controls__btn controls__btn--goal-minus" id="btnAwayMinus">−1 mark</button>
             </div>
