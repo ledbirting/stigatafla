@@ -112,7 +112,7 @@
     }
     .scoreboard__wallClock {
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-weight: 700;
+      font-weight: 300;
       font-size: 112px;
       line-height: 1;
       letter-spacing: 0.06em;
@@ -581,7 +581,7 @@
         <div class="scoreboard__clock" id="clockEl" aria-live="polite">00:00</div>
       </div>
       <div class="scoreboard__idle" id="idleClockLayer" aria-hidden="true">
-        <div class="scoreboard__wallClock" id="wallClockEl" aria-live="off">00:00:00</div>
+        <div class="scoreboard__wallClock" id="wallClockEl" aria-live="off">00:00</div>
       </div>
     </div>
 
@@ -750,13 +750,12 @@
 
       function tickWallClock() {
         var d = new Date();
-        var key = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        var key = d.getHours() + ":" + d.getMinutes();
         if (key === wallClockLastKey) return;
         wallClockLastKey = key;
         wallClockEl.textContent =
           String(d.getHours()).padStart(2, "0") + ":" +
-          String(d.getMinutes()).padStart(2, "0") + ":" +
-          String(d.getSeconds()).padStart(2, "0");
+          String(d.getMinutes()).padStart(2, "0");
       }
 
       function maybeSwitchOvernightClock() {

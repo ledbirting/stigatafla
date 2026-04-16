@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Modes
 
-- **Clock slide (default):** Full-canvas idle state with `Clock-BG.jpg` and a centered **wall clock** (local time, `HH:MM:SS`). Every full page load starts here.
+- **Clock slide (default):** Full-canvas idle state with `Clock-BG.jpg` and a centered **wall clock** (local time, `HH:MM`, light weight). Every full page load starts here.
 - **Match mode:** Tournament background, badges, scores, and **match timer** in `#clockEl`.
 
 Presentation is controlled by classes on `#scoreboardRoot`: `scoreboard--presentation-clock` vs `scoreboard--presentation-match`. Crossfades use **~3.5s** opacity transitions.
