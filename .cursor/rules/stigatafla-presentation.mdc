@@ -1,0 +1,34 @@
+---
+description: Stigatafla broadcast presentation — clock slide vs match scoreboard
+globs: index.html
+alwaysApply: false
+---
+
+# Stigatafla presentation (1152×768)
+
+## Modes
+
+- **Clock slide (default):** Full-canvas idle state with `Clock-BG.jpg` and a centered **wall clock** (local time, `HH:MM:SS`). Every full page load starts here.
+- **Match mode:** Tournament background, badges, scores, and **match timer** in `#clockEl`.
+
+Presentation is controlled by classes on `#scoreboardRoot`: `scoreboard--presentation-clock` vs `scoreboard--presentation-match`. Crossfades use **~3.5s** opacity transitions.
+
+## Controls during clock
+
+Tournament and team selects in **Stjórnborð** must keep working while the clock slide is visible. They update `#scoreboardBg` and badges in the DOM so that when the operator switches to **Sýna leik**, match mode already reflects the chosen setup.
+
+## Footer (`broadcast-footer`)
+
+Fixed under the 1152×768 zone (`top: 768px`, `width: 1152px`):
+
+- **Sýna leik** — clock → match (same fade timing).
+- **Biðklukka (stutt)** — only in match: slow fade to clock slide, short hold, slow fade back to match; both footer buttons stay disabled for the whole sequence.
+
+## 11pm rule
+
+If the tab stays open in **match** mode and local time reaches **23:00**, automatically switch to the **clock slide** (no interlude). Reloading the page always returns to clock slide first, including after 23:00.
+
+## Implementation notes
+
+- Wall clock: `#wallClockEl`. Match timer: `#clockEl` — do not merge.
+- Do not persist presentation mode in `localStorage`; refresh behavior is intentional.
