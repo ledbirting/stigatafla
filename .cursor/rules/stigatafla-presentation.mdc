@@ -22,7 +22,7 @@ Tournament and team selects in **Stjórnborð** must keep working while the cloc
 Fixed under the 1152×768 zone (`top: 768px`, `width: 1152px`):
 
 - **Sýna leik** — clock → match (same fade timing).
-- **Biðklukka (stutt)** — only in match: slow fade to clock slide, short hold, slow fade back to match; both footer buttons stay disabled for the whole sequence.
+- **Biðklukka** — only in match: slow fade to clock slide and **stay** there until **Sýna leik**.
 
 ## 11pm rule
 

@@ -587,7 +587,7 @@
 
     <div class="broadcast-footer" role="toolbar" aria-label="Útsending">
       <button type="button" class="broadcast-footer__btn broadcast-footer__btn--primary" id="btnShowMatch">Sýna leik</button>
-      <button type="button" class="broadcast-footer__btn broadcast-footer__btn--secondary" id="btnClockInterlude" disabled>Biðklukka (stutt)</button>
+      <button type="button" class="broadcast-footer__btn broadcast-footer__btn--secondary" id="btnClockInterlude" disabled>Biðklukka</button>
     </div>
 
     <div class="controls-shell">
@@ -727,23 +727,15 @@
       var btnShowMatch = document.getElementById("btnShowMatch");
       var btnClockInterlude = document.getElementById("btnClockInterlude");
 
-      var PRESENTATION_FADE_MS = 3500;
-      var INTERLUDE_HOLD_MS = 2600;
       var OVERNIGHT_HOUR = 23;
 
       var presentationMode = "clock";
-      var interludeRunning = false;
       var wallClockLastKey = "";
 
       function applyPresentationFromState() {
         scoreboardRoot.classList.remove("scoreboard--presentation-clock", "scoreboard--presentation-match");
         scoreboardRoot.classList.add(presentationMode === "clock" ? "scoreboard--presentation-clock" : "scoreboard--presentation-match");
         idleClockLayer.setAttribute("aria-hidden", presentationMode === "clock" ? "false" : "true");
-        if (interludeRunning) {
-          btnShowMatch.disabled = true;
-          btnClockInterlude.disabled = true;
-          return;
-        }
         btnShowMatch.disabled = presentationMode === "match";
         btnClockInterlude.disabled = presentationMode === "clock";
       }
@@ -759,28 +751,10 @@
       }
 
       function maybeSwitchOvernightClock() {
-        if (interludeRunning) return;
         if (new Date().getHours() < OVERNIGHT_HOUR) return;
         if (presentationMode !== "match") return;
         presentationMode = "clock";
         applyPresentationFromState();
-      }
-
-      function runClockInterlude() {
-        if (interludeRunning || presentationMode !== "match") return;
-        interludeRunning = true;
-        presentationMode = "clock";
-        applyPresentationFromState();
-        setTimeout(function () {
-          setTimeout(function () {
-            presentationMode = "match";
-            applyPresentationFromState();
-            setTimeout(function () {
-              interludeRunning = false;
-              applyPresentationFromState();
-            }, PRESENTATION_FADE_MS);
-          }, INTERLUDE_HOLD_MS);
-        }, PRESENTATION_FADE_MS);
       }
 
       function clampSeconds(s) {
@@ -981,12 +955,16 @@
       });
 
       btnShowMatch.addEventListener("click", function () {
-        if (interludeRunning || presentationMode === "match") return;
+        if (presentationMode === "match") return;
         presentationMode = "match";
         applyPresentationFromState();
       });
 
-      btnClockInterlude.addEventListener("click", runClockInterlude);
+      btnClockInterlude.addEventListener("click", function () {
+        if (presentationMode !== "match") return;
+        presentationMode = "clock";
+        applyPresentationFromState();
+      });
 
       setInterval(maybeSwitchOvernightClock, 60000);
       maybeSwitchOvernightClock();
