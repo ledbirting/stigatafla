@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stigatafla — Keflavík</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playwrite+NO:wght@100..400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --chrome-bg: #0a0a0c;
+      --chrome-bg-elevated: #141416;
+      --chrome-card: #1c1c1f;
+      --chrome-border: rgba(255, 255, 255, 0.08);
+      --chrome-border-strong: rgba(255, 255, 255, 0.14);
+      --chrome-text: #f5f5f7;
+      --chrome-muted: #e2e2e2;
+      --chrome-hint: #cfcfcf;
+      --accent: #0a84ff;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+    * { box-sizing: border-box; }
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--chrome-text);
+      background: var(--chrome-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    .app {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      width: min(100vw, 2600px);
+      height: min(100vh, 1100px);
+      max-width: 2600px;
+      max-height: 1100px;
+      padding-left: 768px;
+      margin: 0;
+      overflow: hidden;
+    }
+    .scoreboard {
+      /* 768×768 — grid guides (Photoshop; ±1px). */
+      --sb-badge-x: 65px;
+      --sb-badge-y: 175px;
+      --sb-badge-w: 235px;
+      --sb-badge-h: 235px;
+      --sb-score-home-x: 122px;
+      --sb-score-away-x: 122px;
+      --sb-score-y: 454px;
+      --sb-score-num-w: 120px;
+      --sb-score-num-size: 157px;
+      --sb-score-cell-h: 157px;
+      --sb-clock-x: 244px;
+      --sb-clock-y: 641px;
+      --sb-clock-w: 280px;
+      --sb-clock-h: 127px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 768px;
+      height: 768px;
+      margin: 0;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+    }
+    .scoreboard__bg {
+      position: absolute;
+      inset: 0;
+      background-color: #1a1a1a;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .scoreboard__stage {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 3.5s cubic-bezier(0.33, 0, 0.2, 1);
+    }
+    .scoreboard__idle {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 28px 56px;
+      box-sizing: border-box;
+      background-color: #060606;
+      background-image: url("https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Keflavik-Klukka.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 3.5s cubic-bezier(0.33, 0, 0.2, 1);
+    }
+    .scoreboard__wallClock {
+      /* Google Fonts: “Playwrite Norge” is served as family name Playwrite NO */
+      font-family: "Playwrite NO", "Inter", system-ui, -apple-system, BlinkMacSystemFont, cursive;
+      font-weight: 300;
+      font-size: 92px;
+      line-height: 1;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+      color: #f5f5f7;
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 40px rgba(0, 0, 0, 0.55);
+      user-select: none;
+    }
+    .scoreboard__gmt {
+      position: absolute;
+      top: 48px;
+      right: 40px;
+      z-index: 2;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      color: #ffffff;
+      user-select: none;
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.08),
+        0 6px 28px rgba(0, 0, 0, 0.45);
+    }
+    .scoreboard--presentation-clock .scoreboard__idle {
+      opacity: 1;
+    }
+    .scoreboard--presentation-clock .scoreboard__stage {
+      opacity: 0;
+    }
+    .scoreboard--presentation-match .scoreboard__idle {
+      opacity: 0;
+    }
+    .scoreboard--presentation-match .scoreboard__stage {
+      opacity: 1;
+    }
+    .scoreboard--presentation-clock .scoreboard__stage {
+      pointer-events: none;
+    }
+    .scoreboard__badge {
+      position: absolute;
+      top: var(--sb-badge-y);
+      width: var(--sb-badge-w);
+      height: var(--sb-badge-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+    .scoreboard__badge--home {
+      left: var(--sb-badge-x);
+    }
+    .scoreboard__badge--away {
+      right: var(--sb-badge-x);
+    }
+    .scoreboard__badge img {
+      width: 88%;
+      height: 88%;
+      object-fit: contain;
+      display: block;
+    }
+    .scoreboard__score-cell {
+      position: absolute;
+      top: var(--sb-score-y);
+      width: var(--sb-score-num-w);
+      height: var(--sb-score-cell-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      background: transparent;
+    }
+    .scoreboard__score-cell--home {
+      left: var(--sb-score-home-x);
+    }
+    .scoreboard__score-cell--away {
+      right: var(--sb-score-away-x);
+    }
+    .scoreboard__score-num {
+      font-family: "Inter", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: var(--sb-score-num-size);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      user-select: none;
+      text-align: center;
+    }
+    .scoreboard__clock {
+      position: absolute;
+      left: var(--sb-clock-x);
+      top: var(--sb-clock-y);
+      width: var(--sb-clock-w);
+      height: var(--sb-clock-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      box-sizing: border-box;
+      background: transparent;
+      font-family: "Inter", system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 62px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      user-select: none;
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+    .controls-shell {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--chrome-bg) 0%, #070708 100%);
+    }
+    .controls {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+    .controls__title {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--chrome-text);
+      flex-shrink: 0;
+    }
+    .controls__cards {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 10px;
+      overflow: hidden;
+    }
+    .controls__card {
+      flex: 0 0 auto;
+      min-width: 0;
+      min-height: 0;
+      background: var(--chrome-card);
+      border: 1px solid var(--chrome-border);
+      border-radius: var(--radius);
+      padding: 10px 11px 12px;
+      margin-bottom: 0;
+      box-shadow: var(--shadow-card);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .controls__card--match,
+    .controls__card--clock,
+    .controls__card--goals {
+      gap: 8px;
+    }
+    .controls__card--clock {
+      flex: 1;
+      min-height: 0;
+    }
+    .controls__field {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .controls__field .controls__label {
+      flex-shrink: 0;
+      margin-bottom: 6px;
+    }
+    .controls__card--match .controls__field .controls__select {
+      flex: none;
+      min-height: 44px;
+      font-size: 20px;
+      font-weight: 600;
+      padding: 10px 36px 10px 12px;
+    }
+    .controls__clock-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .controls__grid2--fill {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 10px;
+    }
+    .controls__grid2--fill .controls__btn {
+      min-height: 0;
+      height: 100%;
+      align-self: stretch;
+      font-size: clamp(17px, 2vw, 28px);
+      font-weight: 700;
+      padding: 12px 10px;
+    }
+    .controls__grid-cal--fill {
+      flex: 1.15;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+    .controls h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--chrome-muted);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .controls__subhead {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--chrome-hint);
+      flex-shrink: 0;
+    }
+    .controls__divider { height: 1px; background: var(--chrome-border); margin: 0; border: 0; flex-shrink: 0; }
+    .controls label.controls__label {
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--chrome-muted);
+      margin-bottom: 8px;
+    }
+    select.controls__select {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 500;
+      border: 1px solid var(--chrome-border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--chrome-bg-elevated);
+      color: var(--chrome-text);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2398989d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 32px;
+      touch-action: manipulation;
+    }
+    select.controls__select:hover { border-color: rgba(255, 255, 255, 0.22); }
+    select.controls__select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .controls__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
+    .controls__grid-cal { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
+    button.controls__btn {
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 600;
+      padding: 8px 10px;
+      min-height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--chrome-border-strong);
+      background: var(--chrome-bg-elevated);
+      color: var(--chrome-text);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button.controls__btn:active { transform: scale(0.98); }
+    button.controls__btn:hover { background: #252528; border-color: rgba(255, 255, 255, 0.2); }
+    button.controls__btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    button.controls__btn--block {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px;
+      text-align: center;
+      line-height: 1.15;
+      padding: 10px 10px;
+    }
+    button.controls__btn--go {
+      background: rgba(50, 215, 75, 0.14);
+      border-color: rgba(50, 215, 75, 0.45);
+      color: #5be27a;
+    }
+    button.controls__btn--go:hover {
+      background: rgba(50, 215, 75, 0.22);
+      border-color: rgba(50, 215, 75, 0.6);
+    }
+    button.controls__btn--pause {
+      background: rgba(255, 69, 58, 0.12);
+      border-color: rgba(255, 69, 58, 0.4);
+      color: #ff8a83;
+    }
+    button.controls__btn--pause:hover {
+      background: rgba(255, 69, 58, 0.2);
+      border-color: rgba(255, 69, 58, 0.55);
+    }
+    button.controls__btn--resume {
+      background: rgba(10, 132, 255, 0.16);
+      border-color: rgba(10, 132, 255, 0.45);
+      color: #64b4ff;
+    }
+    button.controls__btn--resume:hover {
+      background: rgba(10, 132, 255, 0.24);
+      border-color: rgba(10, 132, 255, 0.6);
+    }
+    button.controls__btn--cal { min-height: 36px; font-size: 11px; padding: 6px 8px; }
+    .controls__grid-cal--fill button.controls__btn--cal {
+      min-height: 0;
+      height: 100%;
+      align-self: stretch;
+      font-size: clamp(14px, 1.65vw, 22px);
+      font-weight: 700;
+      padding: 10px 8px;
+    }
+    button.controls__btn--goal-plus {
+      min-height: 52px;
+      font-size: 22px;
+      font-weight: 700;
+      background: rgba(50, 215, 75, 0.12);
+      border-color: rgba(50, 215, 75, 0.35);
+      color: #5be27a;
+      padding: 12px 10px;
+    }
+    button.controls__btn--goal-plus:hover {
+      background: rgba(50, 215, 75, 0.2);
+      border-color: rgba(50, 215, 75, 0.5);
+    }
+    button.controls__btn--goal-minus {
+      min-height: 44px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #ff8a83;
+      border-color: rgba(255, 69, 58, 0.28);
+      background: rgba(255, 69, 58, 0.08);
+      padding: 10px 10px;
+    }
+    button.controls__btn--goal-minus:hover {
+      background: rgba(255, 69, 58, 0.15);
+      border-color: rgba(255, 69, 58, 0.42);
+    }
+    .controls__goal-grid {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .controls__goal-box {
+      flex: 1;
+      min-width: 0;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: var(--chrome-bg-elevated);
+      border: 1px solid var(--chrome-border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .controls__goal-tag {
+      flex-shrink: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--chrome-hint);
+      margin: 0;
+    }
+    .broadcast-footer {
+      position: fixed;
+      left: 0;
+      top: 768px;
+      width: 768px;
+      padding: 12px 16px 16px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      z-index: 11;
+      background: linear-gradient(180deg, rgba(10, 10, 12, 0.88) 0%, rgba(7, 7, 8, 0.96) 100%);
+      border-top: 1px solid var(--chrome-border);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+    }
+    .broadcast-footer__btn {
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      padding: 12px 20px;
+      min-height: 48px;
+      min-width: 160px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(44, 44, 48, 0.65);
+      color: var(--chrome-text);
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.25s ease,
+        transform 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .broadcast-footer__btn:hover:not(:disabled) {
+      background: rgba(56, 56, 60, 0.85);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+    .broadcast-footer__btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .broadcast-footer__btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .broadcast-footer__btn:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+    .broadcast-footer__btn--primary {
+      background: rgba(10, 132, 255, 0.22);
+      border-color: rgba(10, 132, 255, 0.45);
+      color: #e8f2ff;
+    }
+    .broadcast-footer__btn--primary:hover:not(:disabled) {
+      background: rgba(10, 132, 255, 0.32);
+      border-color: rgba(10, 132, 255, 0.58);
+    }
+    .broadcast-footer__btn--secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="scoreboard scoreboard--presentation-clock" id="scoreboardRoot" aria-label="Stigatafla">
+      <div class="scoreboard__bg" id="scoreboardBg"></div>
+      <div class="scoreboard__stage" id="scoreboardStage">
+        <div class="scoreboard__badge scoreboard__badge--home">
+          <img id="homeBadge" src="" alt="" />
+        </div>
+        <div class="scoreboard__badge scoreboard__badge--away">
+          <img id="awayBadge" src="" alt="" />
+        </div>
+        <div class="scoreboard__gmt" id="gmtClockEl" aria-live="off">00:00</div>
+        <div class="scoreboard__score-cell scoreboard__score-cell--home">
+          <span class="scoreboard__score-num" id="homeScoreEl" aria-live="polite">0</span>
+        </div>
+        <div class="scoreboard__score-cell scoreboard__score-cell--away">
+          <span class="scoreboard__score-num" id="awayScoreEl" aria-live="polite">0</span>
+        </div>
+        <div class="scoreboard__clock" id="clockEl" aria-live="polite">00:00</div>
+      </div>
+      <div class="scoreboard__idle" id="idleClockLayer" aria-hidden="true">
+        <div class="scoreboard__wallClock" id="wallClockEl" aria-live="off">00:00</div>
+      </div>
+    </div>
+
+    <div class="broadcast-footer" role="toolbar" aria-label="Útsending">
+      <button type="button" class="broadcast-footer__btn broadcast-footer__btn--primary" id="btnShowMatch">Sýna leik</button>
+      <button type="button" class="broadcast-footer__btn broadcast-footer__btn--secondary" id="btnClockInterlude" disabled>Biðklukka</button>
+    </div>
+
+    <div class="controls-shell">
+      <div class="controls">
+        <h1 class="controls__title">Stjórnborð — Keflavík</h1>
+
+        <div class="controls__cards">
+        <section class="controls__card controls__card--match" aria-labelledby="match-heading">
+          <h2 id="match-heading">Leikur</h2>
+          <div class="controls__field">
+            <label class="controls__label" for="tournamentSelect">Mót / bakgrunnur</label>
+            <select id="tournamentSelect" class="controls__select"></select>
+          </div>
+          <div class="controls__field">
+            <label class="controls__label" for="homeTeamSelect">Heimalið</label>
+            <select id="homeTeamSelect" class="controls__select"></select>
+          </div>
+          <div class="controls__field">
+            <label class="controls__label" for="opponentSelect">Útilið</label>
+            <select id="opponentSelect" class="controls__select"></select>
+          </div>
+        </section>
+
+        <section class="controls__card controls__card--clock" aria-labelledby="clock-heading">
+          <h2 id="clock-heading">Klukka</h2>
+          <div class="controls__clock-body">
+            <div class="controls__grid2 controls__grid2--fill">
+              <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnFirstHalf">Byrja 1. hálfleik</button>
+              <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnSecondHalf">Byrja 2. hálfleik</button>
+            </div>
+            <hr class="controls__divider" />
+            <div class="controls__grid2 controls__grid2--fill">
+              <button type="button" class="controls__btn controls__btn--block controls__btn--pause" id="btnStop">Stöðva tímann</button>
+              <button type="button" class="controls__btn controls__btn--block controls__btn--resume" id="btnResume">Halda áfram</button>
+            </div>
+            <p class="controls__subhead">Tímaleiðrétting</p>
+            <div class="controls__grid-cal controls__grid-cal--fill">
+              <button type="button" class="controls__btn controls__btn--cal" id="btnCalMinusMin">−1 mín</button>
+              <button type="button" class="controls__btn controls__btn--cal" id="btnCalPlusMin">+1 mín</button>
+              <button type="button" class="controls__btn controls__btn--cal" id="btnCalMinus">−1 sek</button>
+              <button type="button" class="controls__btn controls__btn--cal" id="btnCalPlus">+1 sek</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="controls__card controls__card--goals" aria-labelledby="goals-heading">
+          <h2 id="goals-heading">Mörk</h2>
+          <div class="controls__goal-grid">
+            <div class="controls__goal-box">
+              <p class="controls__goal-tag">Heimalið</p>
+              <button type="button" class="controls__btn controls__btn--goal-plus" id="btnHomePlus">+1 mark</button>
+              <button type="button" class="controls__btn controls__btn--goal-minus" id="btnHomeMinus">−1 mark</button>
+            </div>
+            <div class="controls__goal-box">
+              <p class="controls__goal-tag">Útilið</p>
+              <button type="button" class="controls__btn controls__btn--goal-plus" id="btnAwayPlus">+1 mark</button>
+              <button type="button" class="controls__btn controls__btn--goal-minus" id="btnAwayMinus">−1 mark</button>
+            </div>
+          </div>
+        </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var OPPONENTS = [
+        { id: "kr", name: "KR", badgeUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/KR.png" },
+        { id: "afturelding", name: "Afturelding", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Afturelding.png" },
+        { id: "breidablik", name: "Breiðablik", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Breidablik.png" },
+        { id: "fh", name: "FH", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/FH.png" },
+        { id: "fjolnir", name: "Fjölnir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fjolnir.png" },
+        { id: "fram", name: "Fram", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fram.png" },
+        { id: "fylkir", name: "Fylkir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Fylkir.png" },
+        { id: "grindavik-njardvik", name: "Grindavík/Njarðvík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grindavik-Njardvik.jpg" },
+        { id: "grindavik", name: "Grindavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grindavik.png" },
+        { id: "grotta", name: "Grótta", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Grotta.png" },
+        { id: "haukar", name: "Haukar", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Haukar.png" },
+        { id: "hk", name: "HK", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/HK.png" },
+        { id: "ia", name: "ÍA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IA.png" },
+        { id: "ibv", name: "ÍBV", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IBV.png" },
+        { id: "ir", name: "ÍR", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/IR.jpg" },
+        { id: "ka", name: "KA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/KA.jpg" },
+        { id: "keflavik", name: "Keflavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/keflavik.png" },
+        { id: "leiknir", name: "Leiknir", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Leiknir.png" },
+        { id: "njardvik", name: "Njarðvík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Njardvik.jpg" },
+        { id: "selfoss", name: "Selfoss", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Selfoss.png" },
+        { id: "stjarnan", name: "Stjarnan", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Stjarnan.png" },
+        { id: "thor-ka", name: "Þór/KA", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Thor-KA.jpg" },
+        { id: "thor", name: "Þór", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Thor.png" },
+        { id: "throttur", name: "Þróttur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Throttur.png" },
+        { id: "tindastoll", name: "Tindastóll", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Tindastoll.png" },
+        { id: "valur", name: "Valur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Valur.png" },
+        { id: "vestri", name: "Vestri", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Vestri.png" },
+        { id: "vikingur", name: "Víkingur Reykjavík", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Vikingur.jpg" },
+        { id: "volsungur", name: "Völsungur", badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/Volsungur.png" },
+      ];
+
+      var KEF_HOME = {
+        id: "keflavik",
+        name: "Keflavík",
+        badgeUrl: "https://media.zapp.is/storage/v1/object/public/ledbirting-efni/keflavik.png",
+      };
+
+      var HOME_TEAM_OPTIONS = [KEF_HOME].concat(
+        OPPONENTS.filter(function (o) {
+          return o.id !== "keflavik";
+        })
+      );
+
+      var TOURNAMENTS = [
+        { id: "besta", name: "Besta deildin", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Besta.jpg" },
+        { id: "mjolk", name: "Mjólkurbikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Mjolk.jpg" },
+        { id: "lengju", name: "Lengjubikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Lengju.jpg" },
+        { id: "friendly", name: "Friendly", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Friendly.jpg" },
+      ];
+
+      var HALF1_END = 45 * 60;
+      var HALF2_END = 90 * 60;
+      var MAX_SEC = HALF2_END;
+
+      var matchSeconds = 0;
+      var half = 1;
+      var running = false;
+      var lastFrameTime = null;
+      var homeScore = 0;
+      var awayScore = 0;
+
+      var scoreboardBg = document.getElementById("scoreboardBg");
+      var homeBadge = document.getElementById("homeBadge");
+      var awayBadge = document.getElementById("awayBadge");
+      var awayScoreEl = document.getElementById("awayScoreEl");
+      var homeScoreEl = document.getElementById("homeScoreEl");
+      var clockEl = document.getElementById("clockEl");
+      var tournamentSelect = document.getElementById("tournamentSelect");
+      var homeTeamSelect = document.getElementById("homeTeamSelect");
+      var opponentSelect = document.getElementById("opponentSelect");
+      var scoreboardRoot = document.getElementById("scoreboardRoot");
+      var idleClockLayer = document.getElementById("idleClockLayer");
+      var wallClockEl = document.getElementById("wallClockEl");
+      var gmtClockEl = document.getElementById("gmtClockEl");
+      var btnShowMatch = document.getElementById("btnShowMatch");
+      var btnClockInterlude = document.getElementById("btnClockInterlude");
+
+      var OVERNIGHT_HOUR = 23;
+
+      var presentationMode = "clock";
+      var wallClockLastKey = "";
+      var gmtClockLastKey = "";
+
+      function applyPresentationFromState() {
+        scoreboardRoot.classList.remove("scoreboard--presentation-clock", "scoreboard--presentation-match");
+        scoreboardRoot.classList.add(presentationMode === "clock" ? "scoreboard--presentation-clock" : "scoreboard--presentation-match");
+        idleClockLayer.setAttribute("aria-hidden", presentationMode === "clock" ? "false" : "true");
+        btnShowMatch.disabled = presentationMode === "match";
+        btnClockInterlude.disabled = presentationMode === "clock";
+      }
+
+      function tickWallClock() {
+        var d = new Date();
+        var key = d.getHours() + ":" + d.getMinutes();
+        if (key === wallClockLastKey) return;
+        wallClockLastKey = key;
+        wallClockEl.textContent =
+          String(d.getHours()).padStart(2, "0") + ":" +
+          String(d.getMinutes()).padStart(2, "0");
+      }
+
+      function tickGmtClock() {
+        var d = new Date();
+        var key = d.getUTCHours() + ":" + d.getUTCMinutes();
+        if (key === gmtClockLastKey) return;
+        gmtClockLastKey = key;
+        gmtClockEl.textContent =
+          String(d.getUTCHours()).padStart(2, "0") + ":" +
+          String(d.getUTCMinutes()).padStart(2, "0");
+      }
+
+      function maybeSwitchOvernightClock() {
+        if (new Date().getHours() < OVERNIGHT_HOUR) return;
+        if (presentationMode !== "match") return;
+        presentationMode = "clock";
+        applyPresentationFromState();
+      }
+
+      function clampSeconds(s) {
+        if (s < 0) return 0;
+        if (s > MAX_SEC) return MAX_SEC;
+        return s;
+      }
+
+      function formatClock(totalSec) {
+        var s = Math.floor(totalSec);
+        var mm = Math.floor(s / 60);
+        var ss = s % 60;
+        return String(mm).padStart(2, "0") + ":" + String(ss).padStart(2, "0");
+      }
+
+      function renderClock() {
+        clockEl.textContent = formatClock(matchSeconds);
+      }
+
+      function renderScores() {
+        awayScoreEl.textContent = String(awayScore);
+        homeScoreEl.textContent = String(homeScore);
+      }
+
+      function applyTournamentBackground() {
+        var tid = tournamentSelect.value;
+        for (var i = 0; i < TOURNAMENTS.length; i++) {
+          if (TOURNAMENTS[i].id === tid) {
+            scoreboardBg.style.backgroundImage = 'url("' + TOURNAMENTS[i].bgUrl + '")';
+            return;
+          }
+        }
+      }
+
+      function syncTournamentUi() {
+        tournamentSelect.innerHTML = "";
+        for (var i = 0; i < TOURNAMENTS.length; i++) {
+          var t = TOURNAMENTS[i];
+          var opt = document.createElement("option");
+          opt.value = t.id;
+          opt.textContent = t.name;
+          tournamentSelect.appendChild(opt);
+        }
+        tournamentSelect.value = "besta";
+        applyTournamentBackground();
+      }
+
+      function applyHomeBadgeFromSelect() {
+        var id = homeTeamSelect.value;
+        for (var i = 0; i < HOME_TEAM_OPTIONS.length; i++) {
+          if (HOME_TEAM_OPTIONS[i].id === id) {
+            homeBadge.src = HOME_TEAM_OPTIONS[i].badgeUrl;
+            homeBadge.alt = HOME_TEAM_OPTIONS[i].name;
+            return;
+          }
+        }
+      }
+
+      function syncHomeTeamUi() {
+        homeTeamSelect.innerHTML = "";
+        for (var i = 0; i < HOME_TEAM_OPTIONS.length; i++) {
+          var h = HOME_TEAM_OPTIONS[i];
+          var opt = document.createElement("option");
+          opt.value = h.id;
+          opt.textContent = h.name;
+          homeTeamSelect.appendChild(opt);
+        }
+        homeTeamSelect.value = "keflavik";
+        applyHomeBadgeFromSelect();
+      }
+
+      function applyAwayBadgeById(id) {
+        for (var i = 0; i < OPPONENTS.length; i++) {
+          if (OPPONENTS[i].id === id) {
+            awayBadge.src = OPPONENTS[i].badgeUrl;
+            awayBadge.alt = OPPONENTS[i].name;
+            return;
+          }
+        }
+      }
+
+      function syncOpponentUi(preserveId) {
+        opponentSelect.innerHTML = "";
+        var hid = homeTeamSelect.value;
+        var first = null;
+        for (var i = 0; i < OPPONENTS.length; i++) {
+          var o = OPPONENTS[i];
+          if (o.id === hid) continue;
+          if (!first) first = o;
+          var opt = document.createElement("option");
+          opt.value = o.id;
+          opt.textContent = o.name;
+          opponentSelect.appendChild(opt);
+        }
+        var chosen = preserveId;
+        var ok = false;
+        for (var j = 0; j < opponentSelect.options.length; j++) {
+          if (opponentSelect.options[j].value === chosen) {
+            ok = true;
+            break;
+          }
+        }
+        if (!ok) {
+          chosen = null;
+          for (var k = 0; k < opponentSelect.options.length; k++) {
+            if (opponentSelect.options[k].value === "kr") {
+              chosen = "kr";
+              break;
+            }
+          }
+          if (!chosen && first) chosen = first.id;
+        }
+        opponentSelect.value = chosen;
+        applyAwayBadgeById(opponentSelect.value);
+      }
+
+      tournamentSelect.addEventListener("change", applyTournamentBackground);
+
+      homeTeamSelect.addEventListener("change", function () {
+        applyHomeBadgeFromSelect();
+        syncOpponentUi(opponentSelect.value);
+      });
+
+      opponentSelect.addEventListener("change", function () {
+        applyAwayBadgeById(opponentSelect.value);
+      });
+
+      function startFirstHalf() {
+        if (!running && half === 1 && matchSeconds > 0 && matchSeconds < HALF1_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = 0;
+        half = 1;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function startSecondHalf() {
+        if (!running && half === 2 && matchSeconds >= HALF1_END && matchSeconds < HALF2_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = HALF1_END;
+        half = 2;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function stopClock() {
+        running = false;
+        lastFrameTime = null;
+      }
+
+      function resumeClock() {
+        if (running) return;
+        if (matchSeconds >= HALF2_END) return;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function calibrate(delta) {
+        matchSeconds = clampSeconds(matchSeconds + delta);
+        renderClock();
+      }
+
+      function frame(now) {
+        tickWallClock();
+        tickGmtClock();
+        if (running) {
+          if (lastFrameTime != null) {
+            var dt = (now - lastFrameTime) / 1000;
+            matchSeconds += dt;
+            if (half === 1 && matchSeconds >= HALF1_END) {
+              matchSeconds = HALF1_END;
+              running = false;
+            } else if (half === 2 && matchSeconds >= HALF2_END) {
+              matchSeconds = HALF2_END;
+              running = false;
+            }
+          }
+          if (running) {
+            lastFrameTime = now;
+          } else {
+            lastFrameTime = null;
+          }
+        } else {
+          lastFrameTime = null;
+        }
+        renderClock();
+        requestAnimationFrame(frame);
+      }
+
+      document.getElementById("btnFirstHalf").addEventListener("click", startFirstHalf);
+      document.getElementById("btnSecondHalf").addEventListener("click", startSecondHalf);
+      document.getElementById("btnStop").addEventListener("click", stopClock);
+      document.getElementById("btnResume").addEventListener("click", resumeClock);
+      document.getElementById("btnCalPlus").addEventListener("click", function () { calibrate(1); });
+      document.getElementById("btnCalMinus").addEventListener("click", function () { calibrate(-1); });
+      document.getElementById("btnCalPlusMin").addEventListener("click", function () { calibrate(60); });
+      document.getElementById("btnCalMinusMin").addEventListener("click", function () { calibrate(-60); });
+      document.getElementById("btnHomePlus").addEventListener("click", function () {
+        homeScore += 1;
+        renderScores();
+      });
+      document.getElementById("btnHomeMinus").addEventListener("click", function () {
+        homeScore = Math.max(0, homeScore - 1);
+        renderScores();
+      });
+      document.getElementById("btnAwayPlus").addEventListener("click", function () {
+        awayScore += 1;
+        renderScores();
+      });
+      document.getElementById("btnAwayMinus").addEventListener("click", function () {
+        awayScore = Math.max(0, awayScore - 1);
+        renderScores();
+      });
+
+      btnShowMatch.addEventListener("click", function () {
+        if (presentationMode === "match") return;
+        presentationMode = "match";
+        applyPresentationFromState();
+      });
+
+      btnClockInterlude.addEventListener("click", function () {
+        if (presentationMode !== "match") return;
+        presentationMode = "clock";
+        applyPresentationFromState();
+      });
+
+      setInterval(maybeSwitchOvernightClock, 60000);
+      maybeSwitchOvernightClock();
+
+      applyPresentationFromState();
+      syncTournamentUi();
+      syncHomeTeamUi();
+      syncOpponentUi();
+      renderClock();
+      renderScores();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
