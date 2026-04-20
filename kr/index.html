@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Stigatafla — Keflavík</title>
+  <title>Stigatafla — KR</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playwrite+NO:wght@100..400&display=swap" rel="stylesheet" />
@@ -49,30 +49,29 @@
       height: min(100vh, 1100px);
       max-width: 2600px;
       max-height: 1100px;
-      padding-left: 768px;
+      padding-left: 1152px;
       margin: 0;
       overflow: hidden;
     }
     .scoreboard {
-      /* 768×768 — grid guides (Photoshop; ±1px). */
-      --sb-badge-x: 65px;
-      --sb-badge-y: 175px;
-      --sb-badge-w: 235px;
-      --sb-badge-h: 235px;
-      --sb-score-home-x: 122px;
-      --sb-score-away-x: 122px;
-      --sb-score-y: 454px;
-      --sb-score-num-w: 120px;
-      --sb-score-num-size: 157px;
-      --sb-score-cell-h: 157px;
-      --sb-clock-x: 244px;
-      --sb-clock-y: 641px;
-      --sb-clock-w: 280px;
-      --sb-clock-h: 127px;
+      /* Layout scaled 4/3 from 864×576 guides → 1152×768. */
+      --sb-badge-x: 61.3333333333px;
+      --sb-badge-y: 246.6666666667px;
+      --sb-badge-w: 276px;
+      --sb-badge-h: 274.6666666667px;
+      --sb-score-x: 337.3333333333px;
+      --sb-score-y: 269.3333333333px;
+      --sb-score-w: 477.3333333333px;
+      --sb-score-h: 234.6666666667px;
+      --sb-score-colon-gap: 56px;
+      --sb-clock-x: 370.6666666667px;
+      --sb-clock-y: 533.3333333333px;
+      --sb-clock-w: 410.6666666667px;
+      --sb-clock-h: 122.6666666667px;
       position: fixed;
       top: 0;
       left: 0;
-      width: 768px;
+      width: 1152px;
       height: 768px;
       margin: 0;
       padding: 0;
@@ -100,12 +99,10 @@
       inset: 0;
       z-index: 2;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: 0 28px 56px;
-      box-sizing: border-box;
       background-color: #060606;
-      background-image: url("https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Keflavik-Klukka.jpg");
+      background-image: url("https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Clock-BG.jpg");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -117,7 +114,7 @@
       /* Google Fonts: “Playwrite Norge” is served as family name Playwrite NO */
       font-family: "Playwrite NO", "Inter", system-ui, -apple-system, BlinkMacSystemFont, cursive;
       font-weight: 300;
-      font-size: 92px;
+      font-size: 112px;
       line-height: 1;
       letter-spacing: 0;
       font-variant-numeric: tabular-nums;
@@ -127,45 +124,10 @@
         0 8px 40px rgba(0, 0, 0, 0.55);
       user-select: none;
     }
-    .scoreboard__gmt {
-      position: absolute;
-      top: 48px;
-      right: 40px;
-      z-index: 2;
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-weight: 700;
-      font-size: 38px;
-      line-height: 1;
-      letter-spacing: 0.04em;
-      font-variant-numeric: tabular-nums;
-      color: #ffffff;
-      user-select: none;
-      text-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.08),
-        0 6px 28px rgba(0, 0, 0, 0.45);
-    }
-    .scoreboard__ads {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      background: #000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 3.5s cubic-bezier(0.33, 0, 0.2, 1);
-    }
-    .scoreboard__ads iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
     .scoreboard--presentation-clock .scoreboard__idle {
       opacity: 1;
     }
     .scoreboard--presentation-clock .scoreboard__stage {
-      opacity: 0;
-    }
-    .scoreboard--presentation-clock .scoreboard__ads {
       opacity: 0;
     }
     .scoreboard--presentation-match .scoreboard__idle {
@@ -174,27 +136,8 @@
     .scoreboard--presentation-match .scoreboard__stage {
       opacity: 1;
     }
-    .scoreboard--presentation-match .scoreboard__ads {
-      opacity: 0;
-    }
-    .scoreboard--presentation-ads .scoreboard__idle {
-      opacity: 0;
-    }
-    .scoreboard--presentation-ads .scoreboard__stage {
-      opacity: 0;
-    }
-    .scoreboard--presentation-ads .scoreboard__ads {
-      opacity: 1;
-    }
-    .scoreboard--presentation-clock .scoreboard__stage,
-    .scoreboard--presentation-match .scoreboard__idle,
-    .scoreboard--presentation-match .scoreboard__ads,
-    .scoreboard--presentation-ads .scoreboard__stage,
-    .scoreboard--presentation-ads .scoreboard__idle {
+    .scoreboard--presentation-clock .scoreboard__stage {
       pointer-events: none;
-    }
-    .scoreboard--presentation-ads .scoreboard__ads {
-      pointer-events: auto;
     }
     .scoreboard__badge {
       position: absolute;
@@ -218,32 +161,40 @@
       object-fit: contain;
       display: block;
     }
-    .scoreboard__score-cell {
+    .scoreboard__score {
       position: absolute;
+      left: var(--sb-score-x);
       top: var(--sb-score-y);
-      width: var(--sb-score-num-w);
-      height: var(--sb-score-cell-h);
+      width: var(--sb-score-w);
+      height: var(--sb-score-h);
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
+      padding: 0 16px;
       box-sizing: border-box;
       background: transparent;
     }
-    .scoreboard__score-cell--home {
-      left: var(--sb-score-home-x);
-    }
-    .scoreboard__score-cell--away {
-      right: var(--sb-score-away-x);
-    }
     .scoreboard__score-num {
+      flex: 1 1 0;
+      min-width: 0;
       font-family: "Inter", system-ui, sans-serif;
       font-weight: 900;
-      font-size: var(--sb-score-num-size);
+      font-size: 149.3333333333px;
       line-height: 1;
       letter-spacing: -0.04em;
       color: #ffffff;
       user-select: none;
       text-align: center;
+    }
+    .scoreboard__score-gap {
+      flex: 0 0 var(--sb-score-colon-gap);
+      width: var(--sb-score-colon-gap);
+      height: 1px;
+      align-self: center;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
     }
     .scoreboard__clock {
       position: absolute;
@@ -259,7 +210,7 @@
       background: transparent;
       font-family: "Inter", system-ui, sans-serif;
       font-weight: 800;
-      font-size: 62px;
+      font-size: 85.3333333333px;
       line-height: 1;
       letter-spacing: 0.02em;
       color: #ffffff;
@@ -272,7 +223,7 @@
       flex: 1;
       min-width: 0;
       min-height: 0;
-      padding: 12px 14px 14px;
+      padding: 14px 16px 16px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -288,7 +239,7 @@
     }
     .controls__title {
       margin: 0 0 8px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--chrome-text);
@@ -311,7 +262,7 @@
       background: var(--chrome-card);
       border: 1px solid var(--chrome-border);
       border-radius: var(--radius);
-      padding: 10px 11px 12px;
+      padding: 12px 12px 14px;
       margin-bottom: 0;
       box-shadow: var(--shadow-card);
       overflow-x: hidden;
@@ -341,8 +292,8 @@
     }
     .controls__card--match .controls__field .controls__select {
       flex: none;
-      min-height: 44px;
-      font-size: 20px;
+      min-height: 48px;
+      font-size: 22px;
       font-weight: 600;
       padding: 10px 36px 10px 12px;
     }
@@ -409,7 +360,7 @@
       width: 100%;
       padding: 10px 12px;
       font-family: inherit;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 500;
       border: 1px solid var(--chrome-border-strong);
       border-radius: var(--radius-sm);
@@ -550,7 +501,7 @@
       position: fixed;
       left: 0;
       top: 768px;
-      width: 768px;
+      width: 1152px;
       padding: 12px 16px 16px;
       display: flex;
       flex-direction: row;
@@ -626,11 +577,9 @@
         <div class="scoreboard__badge scoreboard__badge--away">
           <img id="awayBadge" src="" alt="" />
         </div>
-        <div class="scoreboard__gmt" id="gmtClockEl" aria-live="off">00:00</div>
-        <div class="scoreboard__score-cell scoreboard__score-cell--home">
+        <div class="scoreboard__score">
           <span class="scoreboard__score-num" id="homeScoreEl" aria-live="polite">0</span>
-        </div>
-        <div class="scoreboard__score-cell scoreboard__score-cell--away">
+          <span class="scoreboard__score-gap" aria-hidden="true"></span>
           <span class="scoreboard__score-num" id="awayScoreEl" aria-live="polite">0</span>
         </div>
         <div class="scoreboard__clock" id="clockEl" aria-live="polite">00:00</div>
@@ -638,28 +587,16 @@
       <div class="scoreboard__idle" id="idleClockLayer" aria-hidden="true">
         <div class="scoreboard__wallClock" id="wallClockEl" aria-live="off">00:00</div>
       </div>
-      <div class="scoreboard__ads" id="adsLayer" aria-hidden="true">
-        <iframe
-          id="adsFrame"
-          title="Auglýsingar"
-          src=""
-          allow="fullscreen"
-          allowfullscreen
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-        ></iframe>
-      </div>
     </div>
 
     <div class="broadcast-footer" role="toolbar" aria-label="Útsending">
       <button type="button" class="broadcast-footer__btn broadcast-footer__btn--primary" id="btnShowMatch">Sýna leik</button>
       <button type="button" class="broadcast-footer__btn broadcast-footer__btn--secondary" id="btnClockInterlude" disabled>Biðklukka</button>
-      <button type="button" class="broadcast-footer__btn broadcast-footer__btn--secondary" id="btnShowAds">Auglýsingar</button>
     </div>
 
     <div class="controls-shell">
       <div class="controls">
-        <h1 class="controls__title">Stjórnborð — Keflavík</h1>
+        <h1 class="controls__title">Stjórnborð</h1>
 
         <div class="controls__cards">
         <section class="controls__card controls__card--match" aria-labelledby="match-heading">
@@ -723,23 +660,16 @@
   <script src="../teams.js"></script>
   <script>
     (function () {
-      var ADS_PLAYER_URL =
-        "https://zapp.is/player/?setup=https%3A%2F%2Fmedia.zapp.is%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fzapp-user-content%2Fkeflavikfc%2Fadmin%2Fplayer-setups%2Fstigatafla.json";
+      var OPPONENTS = STIGATAFLA_LEAGUE_TEAMS;
+      var KR_HOME = STIGATAFLA_BADGE_KR;
 
-      var OPPONENTS = [STIGATAFLA_BADGE_KR].concat(STIGATAFLA_LEAGUE_TEAMS);
-      var KEF_HOME = STIGATAFLA_BADGE_KEFLAVIK;
-
-      var HOME_TEAM_OPTIONS = [KEF_HOME].concat(
-        OPPONENTS.filter(function (o) {
-          return o.id !== "keflavik";
-        })
-      );
+      var HOME_TEAM_OPTIONS = [KR_HOME].concat(OPPONENTS);
 
       var TOURNAMENTS = [
-        { id: "besta", name: "Besta deildin", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Besta.jpg" },
-        { id: "mjolk", name: "Mjólkurbikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Mjolk.jpg" },
-        { id: "lengju", name: "Lengjubikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Lengju.jpg" },
-        { id: "friendly", name: "Friendly", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KEFLAVIK/Stigatafla-Kef-Friendly.jpg" },
+        { id: "besta", name: "Besta deildin", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Stigatafla-Background-Besta.jpg" },
+        { id: "friendly", name: "Friendly", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Stigatafla-Background-Friendly.jpg" },
+        { id: "lengju", name: "Lengjubikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Stigatafla-Background-Lengju.jpg" },
+        { id: "mjolk", name: "Mjólkurbikarinn", bgUrl: "https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Stigatafla-Background-Mjolk.jpg" },
       ];
 
       var HALF1_END = 45 * 60;
@@ -764,44 +694,21 @@
       var opponentSelect = document.getElementById("opponentSelect");
       var scoreboardRoot = document.getElementById("scoreboardRoot");
       var idleClockLayer = document.getElementById("idleClockLayer");
-      var adsLayer = document.getElementById("adsLayer");
-      var adsFrame = document.getElementById("adsFrame");
       var wallClockEl = document.getElementById("wallClockEl");
-      var gmtClockEl = document.getElementById("gmtClockEl");
       var btnShowMatch = document.getElementById("btnShowMatch");
       var btnClockInterlude = document.getElementById("btnClockInterlude");
-      var btnShowAds = document.getElementById("btnShowAds");
 
       var OVERNIGHT_HOUR = 23;
 
       var presentationMode = "clock";
       var wallClockLastKey = "";
-      var gmtClockLastKey = "";
-
-      function ensureAdsFrameSrc() {
-        if (!adsFrame.getAttribute("src")) {
-          adsFrame.setAttribute("src", ADS_PLAYER_URL);
-        }
-      }
 
       function applyPresentationFromState() {
-        scoreboardRoot.classList.remove(
-          "scoreboard--presentation-clock",
-          "scoreboard--presentation-match",
-          "scoreboard--presentation-ads"
-        );
-        if (presentationMode === "clock") {
-          scoreboardRoot.classList.add("scoreboard--presentation-clock");
-        } else if (presentationMode === "match") {
-          scoreboardRoot.classList.add("scoreboard--presentation-match");
-        } else {
-          scoreboardRoot.classList.add("scoreboard--presentation-ads");
-        }
+        scoreboardRoot.classList.remove("scoreboard--presentation-clock", "scoreboard--presentation-match");
+        scoreboardRoot.classList.add(presentationMode === "clock" ? "scoreboard--presentation-clock" : "scoreboard--presentation-match");
         idleClockLayer.setAttribute("aria-hidden", presentationMode === "clock" ? "false" : "true");
-        adsLayer.setAttribute("aria-hidden", presentationMode === "ads" ? "false" : "true");
         btnShowMatch.disabled = presentationMode === "match";
         btnClockInterlude.disabled = presentationMode === "clock";
-        btnShowAds.disabled = presentationMode === "ads";
       }
 
       function tickWallClock() {
@@ -814,19 +721,9 @@
           String(d.getMinutes()).padStart(2, "0");
       }
 
-      function tickGmtClock() {
-        var d = new Date();
-        var key = d.getUTCHours() + ":" + d.getUTCMinutes();
-        if (key === gmtClockLastKey) return;
-        gmtClockLastKey = key;
-        gmtClockEl.textContent =
-          String(d.getUTCHours()).padStart(2, "0") + ":" +
-          String(d.getUTCMinutes()).padStart(2, "0");
-      }
-
       function maybeSwitchOvernightClock() {
         if (new Date().getHours() < OVERNIGHT_HOUR) return;
-        if (presentationMode !== "match" && presentationMode !== "ads") return;
+        if (presentationMode !== "match") return;
         presentationMode = "clock";
         applyPresentationFromState();
       }
@@ -896,11 +793,37 @@
           opt.textContent = h.name;
           homeTeamSelect.appendChild(opt);
         }
-        homeTeamSelect.value = "keflavik";
+        homeTeamSelect.value = "kr";
         applyHomeBadgeFromSelect();
       }
 
-      function applyAwayBadgeById(id) {
+      function syncOpponentUi() {
+        opponentSelect.innerHTML = "";
+        for (var i = 0; i < OPPONENTS.length; i++) {
+          var o = OPPONENTS[i];
+          var opt = document.createElement("option");
+          opt.value = o.id;
+          opt.textContent = o.name;
+          opponentSelect.appendChild(opt);
+        }
+        var initial = OPPONENTS[0];
+        for (var j = 0; j < OPPONENTS.length; j++) {
+          if (OPPONENTS[j].id === "keflavik") {
+            initial = OPPONENTS[j];
+            break;
+          }
+        }
+        opponentSelect.value = initial.id;
+        awayBadge.src = initial.badgeUrl;
+        awayBadge.alt = initial.name;
+      }
+
+      tournamentSelect.addEventListener("change", applyTournamentBackground);
+
+      homeTeamSelect.addEventListener("change", applyHomeBadgeFromSelect);
+
+      opponentSelect.addEventListener("change", function () {
+        var id = opponentSelect.value;
         for (var i = 0; i < OPPONENTS.length; i++) {
           if (OPPONENTS[i].id === id) {
             awayBadge.src = OPPONENTS[i].badgeUrl;
@@ -908,52 +831,6 @@
             return;
           }
         }
-      }
-
-      function syncOpponentUi(preserveId) {
-        opponentSelect.innerHTML = "";
-        var hid = homeTeamSelect.value;
-        var first = null;
-        for (var i = 0; i < OPPONENTS.length; i++) {
-          var o = OPPONENTS[i];
-          if (o.id === hid) continue;
-          if (!first) first = o;
-          var opt = document.createElement("option");
-          opt.value = o.id;
-          opt.textContent = o.name;
-          opponentSelect.appendChild(opt);
-        }
-        var chosen = preserveId;
-        var ok = false;
-        for (var j = 0; j < opponentSelect.options.length; j++) {
-          if (opponentSelect.options[j].value === chosen) {
-            ok = true;
-            break;
-          }
-        }
-        if (!ok) {
-          chosen = null;
-          for (var k = 0; k < opponentSelect.options.length; k++) {
-            if (opponentSelect.options[k].value === "kr") {
-              chosen = "kr";
-              break;
-            }
-          }
-          if (!chosen && first) chosen = first.id;
-        }
-        opponentSelect.value = chosen;
-        applyAwayBadgeById(opponentSelect.value);
-      }
-
-      tournamentSelect.addEventListener("change", applyTournamentBackground);
-
-      homeTeamSelect.addEventListener("change", function () {
-        applyHomeBadgeFromSelect();
-        syncOpponentUi(opponentSelect.value);
-      });
-
-      opponentSelect.addEventListener("change", function () {
-        applyAwayBadgeById(opponentSelect.value);
       });
 
       function startFirstHalf() {
@@ -999,7 +876,6 @@
 
       function frame(now) {
         tickWallClock();
-        tickGmtClock();
         if (running) {
           if (lastFrameTime != null) {
             var dt = (now - lastFrameTime) / 1000;
@@ -1056,15 +932,8 @@
       });
 
       btnClockInterlude.addEventListener("click", function () {
-        if (presentationMode !== "match" && presentationMode !== "ads") return;
+        if (presentationMode !== "match") return;
         presentationMode = "clock";
-        applyPresentationFromState();
-      });
-
-      btnShowAds.addEventListener("click", function () {
-        if (presentationMode === "ads") return;
-        ensureAdsFrameSrc();
-        presentationMode = "ads";
         applyPresentationFromState();
       });
 

@@ -1,6 +1,6 @@
 ---
 description: Stigatafla broadcast presentation — clock slide vs match scoreboard
-globs: index.html
+globs: kr/index.html
 alwaysApply: false
 ---
 
