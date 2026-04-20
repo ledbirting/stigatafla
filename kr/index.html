@@ -622,6 +622,11 @@
               <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnFirstHalf">Byrja 1. hálfleik</button>
               <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnSecondHalf">Byrja 2. hálfleik</button>
             </div>
+            <p class="controls__subhead">Framlenging</p>
+            <div class="controls__grid2 controls__grid2--fill">
+              <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnExtraFirstHalf">Start extra time 1st half</button>
+              <button type="button" class="controls__btn controls__btn--block controls__btn--go" id="btnExtraSecondHalf">Start extra time 2nd half</button>
+            </div>
             <hr class="controls__divider" />
             <div class="controls__grid2 controls__grid2--fill">
               <button type="button" class="controls__btn controls__btn--block controls__btn--pause" id="btnStop">Stöðva tímann</button>
@@ -674,7 +679,16 @@
 
       var HALF1_END = 45 * 60;
       var HALF2_END = 90 * 60;
-      var MAX_SEC = HALF2_END;
+      var HALF_ET1_END = 105 * 60;
+      var HALF_ET2_END = 120 * 60;
+      var MAX_SEC = HALF_ET2_END;
+
+      function capForHalf(h) {
+        if (h === 1) return HALF1_END;
+        if (h === 2) return HALF2_END;
+        if (h === 3) return HALF_ET1_END;
+        return HALF_ET2_END;
+      }
 
       var matchSeconds = 0;
       var half = 1;
@@ -857,6 +871,30 @@
         lastFrameTime = null;
       }
 
+      function startExtraFirstHalf() {
+        if (!running && half === 3 && matchSeconds >= HALF2_END && matchSeconds < HALF_ET1_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = HALF2_END;
+        half = 3;
+        running = true;
+        lastFrameTime = null;
+      }
+
+      function startExtraSecondHalf() {
+        if (!running && half === 4 && matchSeconds >= HALF_ET1_END && matchSeconds < HALF_ET2_END) {
+          running = true;
+          lastFrameTime = null;
+          return;
+        }
+        matchSeconds = HALF_ET1_END;
+        half = 4;
+        running = true;
+        lastFrameTime = null;
+      }
+
       function stopClock() {
         running = false;
         lastFrameTime = null;
@@ -864,7 +902,7 @@
 
       function resumeClock() {
         if (running) return;
-        if (matchSeconds >= HALF2_END) return;
+        if (matchSeconds >= capForHalf(half)) return;
         running = true;
         lastFrameTime = null;
       }
@@ -886,6 +924,12 @@
             } else if (half === 2 && matchSeconds >= HALF2_END) {
               matchSeconds = HALF2_END;
               running = false;
+            } else if (half === 3 && matchSeconds >= HALF_ET1_END) {
+              matchSeconds = HALF_ET1_END;
+              running = false;
+            } else if (half === 4 && matchSeconds >= HALF_ET2_END) {
+              matchSeconds = HALF_ET2_END;
+              running = false;
             }
           }
           if (running) {
@@ -902,6 +946,8 @@
 
       document.getElementById("btnFirstHalf").addEventListener("click", startFirstHalf);
       document.getElementById("btnSecondHalf").addEventListener("click", startSecondHalf);
+      document.getElementById("btnExtraFirstHalf").addEventListener("click", startExtraFirstHalf);
+      document.getElementById("btnExtraSecondHalf").addEventListener("click", startExtraSecondHalf);
       document.getElementById("btnStop").addEventListener("click", stopClock);
       document.getElementById("btnResume").addEventListener("click", resumeClock);
       document.getElementById("btnCalPlus").addEventListener("click", function () { calibrate(1); });
