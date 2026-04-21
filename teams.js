@@ -29,7 +29,7 @@
     { id: "thor", name: "Þór", badgeUrl: B + "Thor.png" },
     { id: "throttur", name: "Þróttur", badgeUrl: B + "Throttur-F.png" },
     { id: "tindastoll", name: "Tindastóll", badgeUrl: B + "Tindastoll.png" },
-    { id: "valur", name: "Valur", badgeUrl: B + "Valur.png" },
+    { id: "valur", name: "Valur", badgeUrl: B + "Valur-F.png" },
     { id: "vestri", name: "Vestri", badgeUrl: B + "Vestri-F.png" },
     { id: "vikingur", name: "Víkingur Reykjavík", badgeUrl: B + "Vikingur.png" },
     { id: "volsungur", name: "Völsungur", badgeUrl: B + "Volsungur.png" },
