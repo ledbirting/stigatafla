@@ -1,6 +1,7 @@
 /**
  * Full-screen media overlay on the scoreboard: intro / goal sequences.
  * Videos play through; still images use a fixed duration (30s for goals per product spec).
+ * Controllable intro: next / previous / stop with auto-advance on slide end.
  */
 (function (global) {
   var GOAL_IMAGE_MS = 30000;
@@ -18,6 +19,7 @@
     var img = opts.img;
     var skipBtn = opts.skipBtn;
     var gen = 0;
+    var introControllable = null;
 
     video.setAttribute("playsinline", "");
     video.playsInline = true;
@@ -108,6 +110,7 @@
     }
 
     function playSequence(urls, imageDurationMs, onComplete) {
+      introControllable = null;
       var i = 0;
       var myGen = gen;
       function next() {
@@ -124,8 +127,89 @@
       next();
     }
 
+    function callIntroSlideChange(s, isEnded) {
+      if (s && s.onSlideChange) {
+        if (isEnded) s.onSlideChange(-1, s.urls ? s.urls.length : 0, true);
+        else s.onSlideChange(s.i, s.urls.length, false);
+      }
+    }
+
+    function playCurrentIntroSlide() {
+      var s = introControllable;
+      if (!s) return;
+      if (s.i >= s.urls.length) {
+        var oc = s.onComplete;
+        introControllable = null;
+        callIntroSlideChange(s, true);
+        hideOverlay();
+        if (oc) oc();
+        return;
+      }
+      callIntroSlideChange(s, false);
+      var myGen = gen;
+      var url = s.urls[s.i];
+      playOne(url, INTRO_IMAGE_MS, function () {
+        if (myGen !== gen) return;
+        if (!introControllable || introControllable !== s) return;
+        s.i += 1;
+        playCurrentIntroSlide();
+      });
+    }
+
+    function startControllableIntro(urls, onComplete, onSlideChange) {
+      if (!urls || !urls.length) {
+        if (onComplete) onComplete();
+        return;
+      }
+      gen += 1;
+      hideMedia();
+      introControllable = {
+        urls: urls,
+        i: 0,
+        onComplete: onComplete,
+        onSlideChange: onSlideChange,
+      };
+      playCurrentIntroSlide();
+    }
+
+    function introGoNext() {
+      var s = introControllable;
+      if (!s) return;
+      gen += 1;
+      hideMedia();
+      if (s.i < s.urls.length) {
+        s.i += 1;
+      }
+      if (s.i >= s.urls.length) {
+        var oc = s.onComplete;
+        introControllable = null;
+        callIntroSlideChange(s, true);
+        hideOverlay();
+        if (oc) oc();
+        return;
+      }
+      playCurrentIntroSlide();
+    }
+
+    function introGoPrev() {
+      var s = introControllable;
+      if (!s) return;
+      if (s.i <= 0) return;
+      gen += 1;
+      hideMedia();
+      s.i -= 1;
+      playCurrentIntroSlide();
+    }
+
+    function introGetSlideState() {
+      var s = introControllable;
+      if (!s) return null;
+      return { index: s.i, total: s.urls.length, canPrev: s.i > 0, canNext: s.i < s.urls.length - 1, isLast: s.i === s.urls.length - 1 };
+    }
+
     function cancel() {
       gen += 1;
+      introControllable = null;
       hideOverlay();
     }
 
@@ -148,9 +232,12 @@
         }
         playSequence([url], GOAL_IMAGE_MS, onComplete);
       },
-      playIntroSequence: function (urls, onComplete) {
-        playSequence(urls, INTRO_IMAGE_MS, onComplete);
+      playIntroSequence: function (urls, onComplete, onSlideChange) {
+        startControllableIntro(urls, onComplete, onSlideChange);
       },
+      introNext: introGoNext,
+      introPrevious: introGoPrev,
+      getIntroSlideState: introGetSlideState,
       cancel: cancel,
       isActive: isActive,
       hide: hideOverlay,

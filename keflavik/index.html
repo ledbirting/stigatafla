@@ -244,6 +244,7 @@
       user-select: none;
     }
     .controls-shell {
+      position: relative;
       flex: 1;
       min-width: 0;
       min-height: 0;
@@ -613,25 +614,6 @@
       object-fit: contain;
       display: none;
     }
-    .player-media-overlay__skip {
-      position: absolute;
-      bottom: 14px;
-      right: 14px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 10px 16px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(28, 28, 31, 0.92);
-      color: var(--chrome-text);
-      cursor: pointer;
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-    }
-    .player-media-overlay__skip:hover {
-      background: rgba(44, 44, 48, 0.95);
-    }
     .controls__card--intro-launch {
       flex: 0 0 auto;
     }
@@ -642,16 +624,14 @@
       line-height: 1.35;
     }
     .intro-panel-backdrop {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      z-index: 150;
-      background: rgba(0, 0, 0, 0.45);
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
+      padding: 12px;
     }
     .intro-panel-backdrop[hidden] {
       display: none !important;
@@ -745,7 +725,7 @@
     }
     .intro-order-item {
       margin: 0;
-      padding: 8px 10px 8px 12px;
+      padding: 6px 10px 6px 8px;
       font-size: 13px;
       font-weight: 500;
       color: var(--chrome-text);
@@ -755,6 +735,18 @@
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    .intro-order-item__check {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .intro-order-item__name {
+      flex: 1;
+      min-width: 0;
     }
     .intro-order-item:last-child {
       border-bottom: none;
@@ -778,16 +770,14 @@
       color: var(--chrome-hint);
     }
     .goal-picker-backdrop {
-      position: fixed;
+      position: absolute;
       inset: 0;
-      z-index: 100;
-      background: rgba(0, 0, 0, 0.55);
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
+      padding: 12px;
     }
     .goal-picker-backdrop[hidden] {
       display: none !important;
@@ -830,6 +820,61 @@
       text-align: left;
       font-size: 15px;
     }
+    .intro-panel__player-controls {
+      margin: 0 16px 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--chrome-bg-elevated);
+      border: 1px solid var(--chrome-border);
+      flex-shrink: 0;
+    }
+    .intro-panel__player-controls[hidden] {
+      display: none !important;
+    }
+    .intro-panel__player-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .intro-panel__player-row:last-child {
+      margin-bottom: 0;
+    }
+    .intro-panel__slide-label {
+      font-size: 12px;
+      color: var(--chrome-hint);
+      margin-right: auto;
+    }
+    button.intro-panel__player-btn {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--chrome-border-strong);
+      background: #2c2c2e;
+      color: var(--chrome-text);
+      cursor: pointer;
+    }
+    button.intro-panel__player-btn:hover:not(:disabled) {
+      background: #3a3a3c;
+    }
+    button.intro-panel__player-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    button.intro-panel__player-btn--stop {
+      width: 100%;
+      margin-top: 2px;
+      padding: 8px 12px;
+      background: rgba(255, 69, 58, 0.12);
+      border-color: rgba(255, 69, 58, 0.45);
+      color: #ff8a83;
+    }
+    button.intro-panel__player-btn--stop:hover:not(:disabled) {
+      background: rgba(255, 69, 58, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -868,7 +913,6 @@
       <div class="player-media-overlay" id="playerMediaOverlay" aria-hidden="true">
         <video id="playerMediaVideo" class="player-media-overlay__video" playsinline></video>
         <img id="playerMediaImg" class="player-media-overlay__img" alt="" />
-        <button type="button" class="player-media-overlay__skip" id="btnPlayerMediaSkip">Stöðva / sleppa</button>
       </div>
     </div>
 
@@ -944,13 +988,11 @@
 
         <section class="controls__card controls__card--intro-launch" aria-labelledby="intro-launch-heading">
           <h2 id="intro-launch-heading">Kynningar</h2>
-          <p class="controls__intro-launch-hint">Raða leikmönnum og starfsfólki í kynningaglugganum — dregðu röð eins og þú vilt (t.d. þjálfari fyrst eða síðast) og spilaðu kynningu þaðan.</p>
+          <p class="controls__intro-launch-hint">Haka við hver á leikjaplatta (liðslista), raða með drætti, og stjórna kynningu undir.</p>
           <button type="button" class="controls__btn controls__btn--block" id="btnOpenIntroPanel">Opna kynningaglugga</button>
         </section>
         </div>
       </div>
-    </div>
-  </div>
 
   <div id="introPanelBackdrop" class="intro-panel-backdrop" hidden>
     <div class="intro-panel" role="dialog" aria-modal="true" aria-labelledby="introPanelTitle" aria-describedby="introPanelDesc">
@@ -958,7 +1000,15 @@
         <h2 id="introPanelTitle">Kynningar</h2>
         <button type="button" class="intro-panel__close" id="btnCloseIntroPanel">Loka kynningaglugga</button>
       </div>
-      <p class="intro-panel__hint" id="introPanelDesc">Draga til að raða. Röðin er sú sem kynningin spilar.</p>
+      <p class="intro-panel__hint" id="introPanelDesc">Haka við þá sem koma á platta. Röðin hér er kynningarröðin. Örvar á lyklaborða, eða hnapparnir hér.</p>
+      <div class="intro-panel__player-controls" id="introPlayerControls" hidden>
+        <div class="intro-panel__player-row">
+          <span class="intro-panel__slide-label" id="introSlideLabel" aria-live="polite">—</span>
+          <button type="button" class="intro-panel__player-btn" id="btnIntroPrev" disabled>Fyrra nafn</button>
+          <button type="button" class="intro-panel__player-btn" id="btnIntroNext" disabled>Næsta nafn</button>
+        </div>
+        <button type="button" class="intro-panel__player-btn intro-panel__player-btn--stop" id="btnStopIntro" disabled>Stöðva leikmannakynningu</button>
+      </div>
       <div class="intro-panel__grid">
         <div class="intro-panel__col">
           <p class="intro-panel__sub" id="introSubHome">Heimalið</p>
@@ -984,6 +1034,9 @@
         <button type="button" class="controls__btn controls__btn--block" id="goalPickerUnknown">Mark án myndar</button>
         <button type="button" class="controls__btn controls__btn--block" id="goalPickerCancel">Hætta við</button>
       </div>
+    </div>
+  </div>
+
     </div>
   </div>
 
@@ -1055,6 +1108,11 @@
       var introListAway = document.getElementById("introListAway");
       var introSubHome = document.getElementById("introSubHome");
       var introSubAway = document.getElementById("introSubAway");
+      var introPlayerControls = document.getElementById("introPlayerControls");
+      var introSlideLabel = document.getElementById("introSlideLabel");
+      var btnIntroPrev = document.getElementById("btnIntroPrev");
+      var btnIntroNext = document.getElementById("btnIntroNext");
+      var btnStopIntro = document.getElementById("btnStopIntro");
       var btnIntroHome = document.getElementById("btnIntroHome");
       var btnIntroAway = document.getElementById("btnIntroAway");
       var goalPickerBackdrop = document.getElementById("goalPickerBackdrop");
@@ -1068,7 +1126,7 @@
         overlay: document.getElementById("playerMediaOverlay"),
         video: document.getElementById("playerMediaVideo"),
         img: document.getElementById("playerMediaImg"),
-        skipBtn: document.getElementById("btnPlayerMediaSkip"),
+        skipBtn: null,
       });
       var goalPickerSide = null;
 
@@ -1255,6 +1313,18 @@
 
       var introOrderHome = [];
       var introOrderAway = [];
+      var introSheetHome = {};
+      var introSheetAway = {};
+
+      function mergeSheetWithRoster(prev, teamId) {
+        var roster = getRoster(teamId);
+        var out = {};
+        for (var i = 0; i < roster.length; i++) {
+          var id = roster[i].id;
+          out[id] = prev && Object.prototype.hasOwnProperty.call(prev, id) ? prev[id] : false;
+        }
+        return out;
+      }
 
       function defaultIdOrder(teamId) {
         var roster = getRoster(teamId);
@@ -1297,6 +1367,8 @@
       function syncIntroOrdersFromTeams() {
         introOrderHome = mergeOrderWithRoster(introOrderHome, homeTeamSelect.value);
         introOrderAway = mergeOrderWithRoster(introOrderAway, opponentSelect.value);
+        introSheetHome = mergeSheetWithRoster(introSheetHome, homeTeamSelect.value);
+        introSheetAway = mergeSheetWithRoster(introSheetAway, opponentSelect.value);
         if (introPanelBackdrop && !introPanelBackdrop.hidden) {
           renderIntroPanelLists();
         }
@@ -1308,6 +1380,16 @@
         return "#" + p.number + " " + p.name;
       }
 
+      function readSheetFromList(ul, side) {
+        var ch = ul.querySelectorAll(".intro-order-item__check");
+        for (var c = 0; c < ch.length; c++) {
+          var pid = ch[c].getAttribute("data-id");
+          if (!pid) continue;
+          if (side === "home") introSheetHome[pid] = ch[c].checked;
+          else introSheetAway[pid] = ch[c].checked;
+        }
+      }
+
       function syncOrderFromListEl(ul, side) {
         var items = ul.querySelectorAll(".intro-order-item");
         var ids = [];
@@ -1317,6 +1399,7 @@
         }
         if (side === "home") introOrderHome = ids;
         else introOrderAway = ids;
+        readSheetFromList(ul, side);
       }
 
       function getDragAfterElement(ul, y) {
@@ -1354,9 +1437,10 @@
         });
       }
 
-      function renderIntroList(ul, orderIds, teamId) {
+      function renderIntroList(ul, orderIds, teamId, side) {
         ul.innerHTML = "";
         var byId = rosterByIdMap(teamId);
+        var sheet = side === "home" ? introSheetHome : introSheetAway;
         if (!orderIds.length) {
           var empty = document.createElement("li");
           empty.className = "intro-order-empty";
@@ -1372,12 +1456,27 @@
           li.className = "intro-order-item" + (p.isStaff ? " intro-order-item--staff" : "");
           li.setAttribute("draggable", "true");
           li.setAttribute("data-id", p.id);
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.className = "intro-order-item__check";
+          cb.setAttribute("data-id", p.id);
+          cb.checked = !!sheet[p.id];
+          (function (pid, sd) {
+            cb.addEventListener("change", function () {
+              if (sd === "home") introSheetHome[pid] = this.checked;
+              else introSheetAway[pid] = this.checked;
+            });
+          })(p.id, side);
+          li.appendChild(cb);
           var grip = document.createElement("span");
           grip.className = "intro-order-item__grip";
           grip.setAttribute("aria-hidden", "true");
           grip.textContent = "⋮⋮";
+          var name = document.createElement("span");
+          name.className = "intro-order-item__name";
+          name.appendChild(document.createTextNode(labelForPerson(p)));
           li.appendChild(grip);
-          li.appendChild(document.createTextNode(labelForPerson(p)));
+          li.appendChild(name);
           ul.appendChild(li);
         }
       }
@@ -1385,31 +1484,58 @@
       function renderIntroPanelLists() {
         introSubHome.textContent = "Heimalið — " + (homeTeamSelect.options[homeTeamSelect.selectedIndex] || "").text;
         introSubAway.textContent = "Útilið — " + (opponentSelect.options[opponentSelect.selectedIndex] || "").text;
-        renderIntroList(introListHome, introOrderHome, homeTeamSelect.value);
-        renderIntroList(introListAway, introOrderAway, opponentSelect.value);
+        renderIntroList(introListHome, introOrderHome, homeTeamSelect.value, "home");
+        renderIntroList(introListAway, introOrderAway, opponentSelect.value, "away");
       }
 
       function openIntroPanel() {
+        if (!goalPickerBackdrop.hidden) closeGoalPicker();
         introOrderHome = mergeOrderWithRoster(introOrderHome, homeTeamSelect.value);
         introOrderAway = mergeOrderWithRoster(introOrderAway, opponentSelect.value);
+        introSheetHome = mergeSheetWithRoster(introSheetHome, homeTeamSelect.value);
+        introSheetAway = mergeSheetWithRoster(introSheetAway, opponentSelect.value);
         introPanelBackdrop.hidden = false;
         renderIntroPanelLists();
         btnCloseIntroPanel.focus();
       }
 
       function closeIntroPanel() {
+        mediaPlayer.cancel();
+        introPlayerControls.hidden = true;
         introPanelBackdrop.hidden = true;
+      }
+
+      function hasAnyCheckedOnSheet(side) {
+        var order = side === "home" ? introOrderHome : introOrderAway;
+        var sheet = side === "home" ? introSheetHome : introSheetAway;
+        for (var i = 0; i < order.length; i++) {
+          if (sheet[order[i]]) return true;
+        }
+        return false;
       }
 
       function introUrlsFromOrder(teamId, side) {
         var order = side === "home" ? introOrderHome : introOrderAway;
+        var sheet = side === "home" ? introSheetHome : introSheetAway;
         var byId = rosterByIdMap(teamId);
         var urls = [];
         for (var i = 0; i < order.length; i++) {
           var p = byId[order[i]];
-          if (p && p.introUrl) urls.push(p.introUrl);
+          if (p && sheet[order[i]] && p.introUrl) urls.push(p.introUrl);
         }
         return urls;
+      }
+
+      function onIntroSlideChange(index, total, isEnded) {
+        if (isEnded) {
+          introPlayerControls.hidden = true;
+          return;
+        }
+        introPlayerControls.hidden = false;
+        introSlideLabel.textContent = String(index + 1) + " / " + String(total);
+        btnIntroPrev.disabled = index <= 0;
+        btnIntroNext.disabled = false;
+        btnStopIntro.disabled = false;
       }
 
       bindIntroListDnD(introListHome, "home");
@@ -1427,6 +1553,8 @@
       }
 
       function openGoalPicker(side) {
+        mediaPlayer.cancel();
+        introPlayerControls.hidden = true;
         var tid = side === "home" ? homeTeamSelect.value : opponentSelect.value;
         var all = getRoster(tid);
         var roster = sortRosterPlayers(all.filter(function (p) { return !p.isStaff; }));
@@ -1479,25 +1607,70 @@
         syncIntroOrdersFromTeams();
       });
 
+      function afterIntroEnd() {
+        introPlayerControls.hidden = true;
+      }
+
       btnIntroHome.addEventListener("click", function () {
-        if (mediaPlayer.isActive()) return;
         var urls = introUrlsFromOrder(homeTeamSelect.value, "home");
         if (!urls.length) {
-          window.alert("Engar kynningar (myndir/myndbönd) í þessari röð. Athugaðu grunn eða röð í glugganum.");
+          if (!hasAnyCheckedOnSheet("home")) {
+            window.alert("Haka við leikmenn (eða annað starfsfólk) sem á leikjaplötu áður en kynningu er hrint af stað.");
+          } else {
+            window.alert("Engar nothæfar kynningar (myndir/myndbönd) í þessu vali. Athugaðu miðlakerfi.");
+          }
           return;
         }
-        mediaPlayer.playIntroSequence(urls);
+        mediaPlayer.playIntroSequence(
+          urls,
+          afterIntroEnd,
+          onIntroSlideChange
+        );
       });
 
       btnIntroAway.addEventListener("click", function () {
-        if (mediaPlayer.isActive()) return;
         var urls = introUrlsFromOrder(opponentSelect.value, "away");
         if (!urls.length) {
-          window.alert("Engar kynningar (myndir/myndbönd) í þessari röð. Athugaðu grunn eða röð í glugganum.");
+          if (!hasAnyCheckedOnSheet("away")) {
+            window.alert("Haka við leikmenn (eða annað starfsfólk) sem á leikjaplötu áður en kynningu er hrint af stað.");
+          } else {
+            window.alert("Engar nothæfar kynningar (myndir/myndbönd) í þessu vali. Athugaðu miðlakerfi.");
+          }
           return;
         }
-        mediaPlayer.playIntroSequence(urls);
+        mediaPlayer.playIntroSequence(
+          urls,
+          afterIntroEnd,
+          onIntroSlideChange
+        );
       });
+
+      btnIntroPrev.addEventListener("click", function () {
+        mediaPlayer.introPrevious();
+      });
+      btnIntroNext.addEventListener("click", function () {
+        mediaPlayer.introNext();
+      });
+      btnStopIntro.addEventListener("click", function () {
+        mediaPlayer.cancel();
+        introPlayerControls.hidden = true;
+      });
+
+      document.addEventListener(
+        "keydown",
+        function (e) {
+          if (goalPickerBackdrop && !goalPickerBackdrop.hidden) return;
+          if (!mediaPlayer.getIntroSlideState()) return;
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            mediaPlayer.introNext();
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            mediaPlayer.introPrevious();
+          }
+        },
+        true
+      );
 
       goalPickerCancel.addEventListener("click", closeGoalPicker);
 
