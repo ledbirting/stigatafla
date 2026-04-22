@@ -588,6 +588,164 @@
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.12);
     }
+    .player-media-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .player-media-overlay--visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .player-media-overlay__video,
+    .player-media-overlay__img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: none;
+    }
+    .player-media-overlay__skip {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(28, 28, 31, 0.92);
+      color: var(--chrome-text);
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    .player-media-overlay__skip:hover {
+      background: rgba(44, 44, 48, 0.95);
+    }
+    .controls__card--players {
+      gap: 10px;
+      max-height: 340px;
+    }
+    .controls__lineup-hint {
+      margin: 0;
+      font-size: 13px;
+      color: var(--chrome-hint);
+      line-height: 1.35;
+    }
+    .controls__lineup-side-title {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--chrome-muted);
+    }
+    .controls__lineup-count {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--chrome-hint);
+    }
+    .controls__lineup-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+      padding-right: 4px;
+    }
+    .controls__lineup-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .controls__lineup-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--chrome-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    select.controls__select--lineup {
+      flex: 0 0 130px;
+      font-size: 14px;
+      min-height: 36px;
+      padding: 6px 10px;
+    }
+    .controls__lineup-empty {
+      margin: 0;
+      font-size: 13px;
+      color: var(--chrome-hint);
+    }
+    .goal-picker-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+    .goal-picker-backdrop[hidden] {
+      display: none !important;
+    }
+    .goal-picker {
+      width: min(420px, 100%);
+      max-height: min(80vh, 560px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--chrome-card);
+      border: 1px solid var(--chrome-border-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+    }
+    .goal-picker__head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--chrome-border);
+    }
+    .goal-picker__head h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .goal-picker__list {
+      padding: 10px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .goal-picker__actions {
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--chrome-border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    button.goal-picker__choice {
+      text-align: left;
+      font-size: 15px;
+    }
   </style>
 </head>
 <body>
@@ -622,6 +780,11 @@
           loading="lazy"
           referrerpolicy="strict-origin-when-cross-origin"
         ></iframe>
+      </div>
+      <div class="player-media-overlay" id="playerMediaOverlay" aria-hidden="true">
+        <video id="playerMediaVideo" class="player-media-overlay__video" playsinline></video>
+        <img id="playerMediaImg" class="player-media-overlay__img" alt="" />
+        <button type="button" class="player-media-overlay__skip" id="btnPlayerMediaSkip">Stöðva / sleppa</button>
       </div>
     </div>
 
@@ -694,12 +857,45 @@
             </div>
           </div>
         </section>
+
+        <section class="controls__card controls__card--players" aria-labelledby="players-heading">
+          <h2 id="players-heading">Leikmenn</h2>
+          <p class="controls__lineup-hint">11 í byrjunarliði, allt að 12 varamenn. Veldu hlutverk fyrir hvern leikmann í grunninum.</p>
+          <div class="controls__field">
+            <h3 class="controls__lineup-side-title">Heimalið</h3>
+            <p class="controls__lineup-count" id="lineupHomeCounts"></p>
+            <div id="lineupHomeRows" class="controls__lineup-rows"></div>
+            <button type="button" class="controls__btn controls__btn--block" id="btnIntroHome">Kynning leikmanna (heima)</button>
+          </div>
+          <hr class="controls__divider" />
+          <div class="controls__field">
+            <h3 class="controls__lineup-side-title">Útilið</h3>
+            <p class="controls__lineup-count" id="lineupAwayCounts"></p>
+            <div id="lineupAwayRows" class="controls__lineup-rows"></div>
+            <button type="button" class="controls__btn controls__btn--block" id="btnIntroAway">Kynning leikmanna (úti)</button>
+          </div>
+        </section>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="goalPickerBackdrop" class="goal-picker-backdrop" hidden>
+    <div class="goal-picker" role="dialog" aria-modal="true" aria-labelledby="goalPickerTitle">
+      <div class="goal-picker__head">
+        <h3 id="goalPickerTitle">Mark</h3>
+      </div>
+      <div id="goalPickerList" class="goal-picker__list"></div>
+      <div class="goal-picker__actions">
+        <button type="button" class="controls__btn controls__btn--block" id="goalPickerUnknown">Mark án myndar</button>
+        <button type="button" class="controls__btn controls__btn--block" id="goalPickerCancel">Hætta við</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../teams.js"></script>
+  <script src="../rosters.js"></script>
+  <script src="../player-media.js"></script>
   <script>
     (function () {
       var ADS_PLAYER_URL =
@@ -758,6 +954,26 @@
       var btnShowMatch = document.getElementById("btnShowMatch");
       var btnClockInterlude = document.getElementById("btnClockInterlude");
       var btnShowAds = document.getElementById("btnShowAds");
+      var lineupHomeRows = document.getElementById("lineupHomeRows");
+      var lineupAwayRows = document.getElementById("lineupAwayRows");
+      var lineupHomeCounts = document.getElementById("lineupHomeCounts");
+      var lineupAwayCounts = document.getElementById("lineupAwayCounts");
+      var btnIntroHome = document.getElementById("btnIntroHome");
+      var btnIntroAway = document.getElementById("btnIntroAway");
+      var goalPickerBackdrop = document.getElementById("goalPickerBackdrop");
+      var goalPickerList = document.getElementById("goalPickerList");
+      var goalPickerTitle = document.getElementById("goalPickerTitle");
+      var goalPickerCancel = document.getElementById("goalPickerCancel");
+      var goalPickerUnknown = document.getElementById("goalPickerUnknown");
+
+      var rosterByTeam = STIGATAFLA_ROSTERS;
+      var mediaPlayer = StigataflaPlayerMedia.createPlayerMediaPlayer({
+        overlay: document.getElementById("playerMediaOverlay"),
+        video: document.getElementById("playerMediaVideo"),
+        img: document.getElementById("playerMediaImg"),
+        skipBtn: document.getElementById("btnPlayerMediaSkip"),
+      });
+      var goalPickerSide = null;
 
       var OVERNIGHT_HOUR = 23;
 
@@ -923,13 +1139,224 @@
 
       tournamentSelect.addEventListener("change", applyTournamentBackground);
 
+      function sortRosterPlayers(roster) {
+        return roster.slice().sort(function (a, b) {
+          return (a.number || 0) - (b.number || 0) || String(a.name).localeCompare(String(b.name));
+        });
+      }
+
+      function getRoster(teamId) {
+        return rosterByTeam[teamId] || [];
+      }
+
+      function readLineup(side) {
+        var container = side === "home" ? lineupHomeRows : lineupAwayRows;
+        var starters = [];
+        var bench = [];
+        var selects = container.querySelectorAll("select.controls__select--lineup");
+        for (var i = 0; i < selects.length; i++) {
+          var sel = selects[i];
+          var role = sel.value;
+          if (role === "starter") starters.push(sel.getAttribute("data-player-id"));
+          if (role === "bench") bench.push(sel.getAttribute("data-player-id"));
+        }
+        return { starters: starters, bench: bench };
+      }
+
+      function updateLineupCounts() {
+        var h = readLineup("home");
+        var a = readLineup("away");
+        lineupHomeCounts.textContent = "Byrjunarlið: " + h.starters.length + "/11 · Varamenn: " + h.bench.length + "/12";
+        lineupAwayCounts.textContent = "Byrjunarlið: " + a.starters.length + "/11 · Varamenn: " + a.bench.length + "/12";
+      }
+
+      function buildLineupRows(container, teamId, side) {
+        container.innerHTML = "";
+        var roster = sortRosterPlayers(getRoster(teamId));
+        if (!roster.length) {
+          var p = document.createElement("p");
+          p.className = "controls__lineup-empty";
+          p.textContent = "Engir leikmenn í grunninum fyrir þetta lið.";
+          container.appendChild(p);
+          updateLineupCounts();
+          return;
+        }
+        for (var r = 0; r < roster.length; r++) {
+          var pl = roster[r];
+          var row = document.createElement("div");
+          row.className = "controls__lineup-row";
+          var lab = document.createElement("span");
+          lab.className = "controls__lineup-name";
+          lab.textContent = "#" + pl.number + " " + pl.name;
+          var sel = document.createElement("select");
+          sel.className = "controls__select controls__select--lineup";
+          sel.setAttribute("data-player-id", pl.id);
+          sel.setAttribute("data-side", side);
+          var roles = [
+            { v: "", t: "—" },
+            { v: "starter", t: "Byrjunarlið" },
+            { v: "bench", t: "Varamenn" },
+          ];
+          for (var j = 0; j < roles.length; j++) {
+            var o = document.createElement("option");
+            o.value = roles[j].v;
+            o.textContent = roles[j].t;
+            sel.appendChild(o);
+          }
+          sel.addEventListener("change", updateLineupCounts);
+          row.appendChild(lab);
+          row.appendChild(sel);
+          container.appendChild(row);
+        }
+        updateLineupCounts();
+      }
+
+      function syncLineupUi() {
+        buildLineupRows(lineupHomeRows, homeTeamSelect.value, "home");
+        buildLineupRows(lineupAwayRows, opponentSelect.value, "away");
+      }
+
+      function validateLineupForIntro(side) {
+        var L = readLineup(side);
+        if (L.starters.length < 1) {
+          return { ok: false, msg: "Veldu að minnsta kosti einn leikmann í byrjunarlið." };
+        }
+        if (L.starters.length > 11) {
+          return { ok: false, msg: "Hámark 11 í byrjunarliði." };
+        }
+        if (L.bench.length > 12) {
+          return { ok: false, msg: "Hámark 12 varamenn." };
+        }
+        if (L.starters.length !== 11) {
+          if (!window.confirm("Byrjunarlið er " + L.starters.length + "/11. Halda áfram með kynningu?")) {
+            return { ok: false, msg: "cancel" };
+          }
+        }
+        return { ok: true };
+      }
+
+      function introUrlsForLineup(teamId, side) {
+        var roster = getRoster(teamId);
+        var byId = {};
+        for (var i = 0; i < roster.length; i++) {
+          byId[roster[i].id] = roster[i];
+        }
+        var L = readLineup(side);
+        var urls = [];
+        for (var s = 0; s < L.starters.length; s++) {
+          var p = byId[L.starters[s]];
+          if (p && p.introUrl) urls.push(p.introUrl);
+        }
+        for (var b = 0; b < L.bench.length; b++) {
+          var q = byId[L.bench[b]];
+          if (q && q.introUrl) urls.push(q.introUrl);
+        }
+        return urls;
+      }
+
+      function closeGoalPicker() {
+        goalPickerBackdrop.hidden = true;
+        goalPickerSide = null;
+      }
+
+      function openGoalPicker(side) {
+        var tid = side === "home" ? homeTeamSelect.value : opponentSelect.value;
+        var roster = sortRosterPlayers(getRoster(tid));
+        if (!roster.length) {
+          if (side === "home") {
+            homeScore += 1;
+            renderScores();
+          } else {
+            awayScore += 1;
+            renderScores();
+          }
+          return;
+        }
+        goalPickerSide = side;
+        goalPickerTitle.textContent = side === "home" ? "Mark — heimalið" : "Mark — útilið";
+        goalPickerList.innerHTML = "";
+        for (var i = 0; i < roster.length; i++) {
+          (function (pl) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "controls__btn controls__btn--block goal-picker__choice";
+            b.textContent = "#" + pl.number + " " + pl.name;
+            b.addEventListener("click", function () {
+              closeGoalPicker();
+              if (side === "home") {
+                homeScore += 1;
+                renderScores();
+              } else {
+                awayScore += 1;
+                renderScores();
+              }
+              if (pl.goalUrl) {
+                mediaPlayer.playGoalGraphic(pl.goalUrl);
+              }
+            });
+            goalPickerList.appendChild(b);
+          })(roster[i]);
+        }
+        goalPickerBackdrop.hidden = false;
+      }
+
       homeTeamSelect.addEventListener("change", function () {
         applyHomeBadgeFromSelect();
         syncOpponentUi(opponentSelect.value);
+        syncLineupUi();
       });
 
       opponentSelect.addEventListener("change", function () {
         applyAwayBadgeById(opponentSelect.value);
+        syncLineupUi();
+      });
+
+      btnIntroHome.addEventListener("click", function () {
+        if (mediaPlayer.isActive()) return;
+        var v = validateLineupForIntro("home");
+        if (!v.ok) {
+          if (v.msg !== "cancel") window.alert(v.msg);
+          return;
+        }
+        var urls = introUrlsForLineup(homeTeamSelect.value, "home");
+        if (!urls.length) {
+          window.alert("Engar kynningar (myndir/myndbönd) fyrir valda leikmenn.");
+          return;
+        }
+        mediaPlayer.playIntroSequence(urls);
+      });
+
+      btnIntroAway.addEventListener("click", function () {
+        if (mediaPlayer.isActive()) return;
+        var v = validateLineupForIntro("away");
+        if (!v.ok) {
+          if (v.msg !== "cancel") window.alert(v.msg);
+          return;
+        }
+        var urls = introUrlsForLineup(opponentSelect.value, "away");
+        if (!urls.length) {
+          window.alert("Engar kynningar (myndir/myndbönd) fyrir valda leikmenn.");
+          return;
+        }
+        mediaPlayer.playIntroSequence(urls);
+      });
+
+      goalPickerCancel.addEventListener("click", closeGoalPicker);
+
+      goalPickerUnknown.addEventListener("click", function () {
+        var side = goalPickerSide;
+        closeGoalPicker();
+        if (side === "home") {
+          homeScore += 1;
+          renderScores();
+        } else if (side === "away") {
+          awayScore += 1;
+          renderScores();
+        }
+      });
+
+      goalPickerBackdrop.addEventListener("click", function (e) {
+        if (e.target === goalPickerBackdrop) closeGoalPicker();
       });
 
       function startFirstHalf() {
@@ -1040,16 +1467,14 @@
       document.getElementById("btnCalPlusMin").addEventListener("click", function () { calibrate(60); });
       document.getElementById("btnCalMinusMin").addEventListener("click", function () { calibrate(-60); });
       document.getElementById("btnHomePlus").addEventListener("click", function () {
-        homeScore += 1;
-        renderScores();
+        openGoalPicker("home");
       });
       document.getElementById("btnHomeMinus").addEventListener("click", function () {
         homeScore = Math.max(0, homeScore - 1);
         renderScores();
       });
       document.getElementById("btnAwayPlus").addEventListener("click", function () {
-        awayScore += 1;
-        renderScores();
+        openGoalPicker("away");
       });
       document.getElementById("btnAwayMinus").addEventListener("click", function () {
         awayScore = Math.max(0, awayScore - 1);
@@ -1082,6 +1507,7 @@
       syncTournamentUi();
       syncHomeTeamUi();
       syncOpponentUi();
+      syncLineupUi();
       renderClock();
       renderScores();
       requestAnimationFrame(frame);
