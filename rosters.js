@@ -13,7 +13,7 @@
 
   global.STIGATAFLA_ROSTERS = {
     kr: [
-      { id: "p0", name: "Óskar Hrafn Þorvaldsson", number: 0, ...krImg("0-Oskar.jpg") },
+      { id: "p0", name: "Óskar Hrafn Þorvaldsson", number: 0, isStaff: true, ...krImg("0-Oskar.jpg") },
       { id: "p1", name: "Arnar Freyr Ólafsson", number: 1, ...krImg("1-Arnar.jpg") },
       { id: "p4", name: "Michael Akoto", number: 4, ...krImg("4-Akoto.jpg") },
       { id: "p5", name: "Birgir Steinn Styrmisson", number: 5, ...krImg("5-Birgir.jpg") },
@@ -46,6 +46,8 @@
       { id: "p77", name: "Orri Hrafn Kjartansson", number: 77, ...krImg("77-Orri.jpg") },
       { id: "p99", name: "Haukur Logi Tryggvason", number: 99, ...krImg("99-Haukur.jpg") },
     ],
-    keflavik: [],
+    keflavik: [
+      { id: "kef-manager", name: "Þjálfari", isStaff: true, number: null, introUrl: "", goalUrl: "" },
+    ],
   };
 })(typeof window !== "undefined" ? window : this);
