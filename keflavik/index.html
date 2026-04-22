@@ -750,7 +750,7 @@
 </head>
 <body>
   <div class="app">
-    <div class="scoreboard scoreboard--presentation-clock" id="scoreboardRoot" aria-label="Stigatafla">
+    <div class="scoreboard scoreboard--presentation-ads" id="scoreboardRoot" aria-label="Stigatafla">
       <div class="scoreboard__bg" id="scoreboardBg"></div>
       <div class="scoreboard__stage" id="scoreboardStage">
         <div class="scoreboard__badge scoreboard__badge--home">
@@ -977,7 +977,7 @@
 
       var OVERNIGHT_HOUR = 23;
 
-      var presentationMode = "clock";
+      var presentationMode = "ads";
       var wallClockLastKey = "";
 
       function ensureAdsFrameSrc() {
@@ -1018,7 +1018,7 @@
 
       function maybeSwitchOvernightClock() {
         if (new Date().getHours() < OVERNIGHT_HOUR) return;
-        if (presentationMode !== "match" && presentationMode !== "ads") return;
+        if (presentationMode !== "match") return;
         presentationMode = "clock";
         applyPresentationFromState();
       }
@@ -1503,6 +1503,7 @@
       setInterval(maybeSwitchOvernightClock, 60000);
       maybeSwitchOvernightClock();
 
+      ensureAdsFrameSrc();
       applyPresentationFromState();
       syncTournamentUi();
       syncHomeTeamUi();
