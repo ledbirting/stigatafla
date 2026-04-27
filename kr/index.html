@@ -1740,10 +1740,24 @@
 
       StigataflaRosterLoader.load()
         .then(function (data) {
+          if (data == null) return;
           var n = StigataflaRosterLoader.normalize(data);
-          if (n) rosterByTeam = n;
+          if (n) {
+            rosterByTeam = n;
+            return;
+          }
+          console.warn(
+            "[Stigatafla] rostersUrl skilaði JSON án gilda 'kr' / 'keflavik' fylkja. Athugaðu skrá. Nota föst gögn (rosters.js).",
+            STIGATAFLA_CONFIG && STIGATAFLA_CONFIG.rostersUrl
+          );
         })
-        .catch(function () { /* nottast sjálfgefið */ })
+        .catch(function (err) {
+          console.warn(
+            "[Stigatafla] gat ekki hlaðað stigatöflu (404, net eða röng slóð) — nota föst gögn (rosters.js).",
+            (err && err.message) || err,
+            STIGATAFLA_CONFIG && STIGATAFLA_CONFIG.rostersUrl
+          );
+        })
         .then(function () {
           bootScoreboard();
         });
