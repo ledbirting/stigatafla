@@ -1068,14 +1068,8 @@
       var HALF2_END = 90 * 60;
       var HALF_ET1_END = 105 * 60;
       var HALF_ET2_END = 120 * 60;
-      var MAX_SEC = HALF_ET2_END;
-
-      function capForHalf(h) {
-        if (h === 1) return HALF1_END;
-        if (h === 2) return HALF2_END;
-        if (h === 3) return HALF_ET1_END;
-        return HALF_ET2_END;
-      }
+      /** Safety cap for manual time adjustment only; match clock may run past 45/90/105/120:00. */
+      var MAX_CLOCK_SEC = 24 * 3600;
 
       var matchSeconds = 0;
       var half = 1;
@@ -1180,7 +1174,7 @@
 
       function clampSeconds(s) {
         if (s < 0) return 0;
-        if (s > MAX_SEC) return MAX_SEC;
+        if (s > MAX_CLOCK_SEC) return MAX_CLOCK_SEC;
         return s;
       }
 
@@ -1745,7 +1739,6 @@
 
       function resumeClock() {
         if (running) return;
-        if (matchSeconds >= capForHalf(half)) return;
         running = true;
         lastFrameTime = null;
       }
@@ -1761,19 +1754,6 @@
           if (lastFrameTime != null) {
             var dt = (now - lastFrameTime) / 1000;
             matchSeconds += dt;
-            if (half === 1 && matchSeconds >= HALF1_END) {
-              matchSeconds = HALF1_END;
-              running = false;
-            } else if (half === 2 && matchSeconds >= HALF2_END) {
-              matchSeconds = HALF2_END;
-              running = false;
-            } else if (half === 3 && matchSeconds >= HALF_ET1_END) {
-              matchSeconds = HALF_ET1_END;
-              running = false;
-            } else if (half === 4 && matchSeconds >= HALF_ET2_END) {
-              matchSeconds = HALF_ET2_END;
-              running = false;
-            }
           }
           if (running) {
             lastFrameTime = now;
