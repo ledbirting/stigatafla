@@ -7,5 +7,5 @@
 window.STIGATAFLA_CONFIG = {
   // After upload: use “Copy public URL” on stigatafla/rosters.json in the bucket.
   // rostersUrl: "https://oiogavgeugatnhcnxtm.supabase.co/storage/v1/object/public/stigatafla/stigatafla/rosters.json",
-  rostersUrl: "",
+  rostersUrl: "https://media.zapp.is/storage/v1/object/public/stigatafla/kr/rosters.json",
 };
