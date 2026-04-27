@@ -10,89 +10,187 @@
   <style>
     :root {
       --bg: #0a0a0c;
-      --card: #1c1c1f;
-      --border: rgba(255, 255, 255, 0.1);
+      --bg-elevated: #141416;
+      --card: #1a1a1d;
+      --card-inner: #121214;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hair: rgba(255, 255, 255, 0.12);
       --text: #f5f5f7;
-      --muted: #a1a1a6;
+      --muted: #98989d;
       --accent: #0a84ff;
       --danger: #ff453a;
       --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
       background: var(--bg);
+      background-image: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(10, 132, 255, 0.12), transparent 50%);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 48px; }
-    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
-    .sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; line-height: 1.45; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 22px 56px; }
+    h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 10px; }
+    .sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; line-height: 1.5; max-width: 56ch; }
+    code { font-size: 0.88em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: rgba(255, 255, 255, 0.07); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 16px;
+      border-radius: var(--radius-lg);
+      padding: 22px 22px 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.04) inset, 0 12px 40px rgba(0, 0, 0, 0.35);
     }
-    .card h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-    label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    .card h2 { margin: 0 0 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    label { display: block; font-size: 12px; font-weight: 600; color: #c7c7cc; margin-bottom: 6px; letter-spacing: 0.02em; }
     input[type="email"],
     input[type="password"],
     input[type="text"],
     input[type="number"] {
       width: 100%;
-      max-width: 360px;
-      padding: 10px 12px;
-      border-radius: 8px;
+      max-width: 400px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      background: #141416;
+      background: var(--card-inner);
       color: var(--text);
       font: inherit;
       font-size: 15px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
-    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+    input:focus-visible {
+      outline: none;
+      border-color: rgba(10, 132, 255, 0.55);
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+    }
+    input::placeholder { color: #6e6e73; }
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); border-radius: 4px; }
+    .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 14px; }
     .row label { margin-bottom: 0; }
-    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field--inline { flex-direction: row; align-items: center; gap: 10px; }
+    .field--inline > label { margin: 0; }
     button {
       font: inherit;
       font-size: 14px;
       font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      background: #2c2c2e;
+      background: #2a2a2d;
       color: var(--text);
       cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
     button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button:hover:not(:disabled) { background: #3a3a3c; }
-    button.btn-primary { background: rgba(10, 132, 255, 0.2); border-color: rgba(10, 132, 255, 0.5); color: #b0d4ff; }
-    button.btn-danger { background: rgba(255, 69, 58, 0.12); border-color: rgba(255, 69, 58, 0.4); color: #ff8a83; }
-    button.btn-ghost { background: transparent; }
+    button:hover:not(:disabled) { background: #36363a; border-color: var(--border-hair); }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button.btn-primary {
+      background: linear-gradient(180deg, rgba(10, 132, 255, 0.32), rgba(10, 132, 255, 0.18));
+      border-color: rgba(10, 132, 255, 0.45);
+      color: #d4e8ff;
+    }
+    button.btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, rgba(10, 132, 255, 0.42), rgba(10, 132, 255, 0.25)); }
+    button.btn-danger { background: rgba(255, 69, 58, 0.12); border-color: rgba(255, 69, 58, 0.35); color: #ffb5b0; }
+    button.btn-ghost { background: transparent; border-color: transparent; color: #64a8ff; padding-left: 10px; padding-right: 10px; }
+    button.btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); }
     [hidden] { display: none !important; }
-    .err { color: #ff8a83; font-size: 14px; margin-top: 8px; }
+    .err { color: #ffb5b0; font-size: 14px; margin-top: 10px; }
     .ok { color: #5be27a; font-size: 14px; margin-top: 8px; }
-    .team-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-    .team-tabs button { min-width: 100px; }
-    .team-tabs button.is-active { background: rgba(10, 132, 255, 0.25); border-color: var(--accent); }
-    .player-row {
-      display: grid;
-      grid-template-columns: 1fr 90px 80px 1fr 1fr auto;
-      gap: 10px;
-      align-items: end;
-      padding: 12px 0;
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 16px;
+      margin-bottom: 8px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
     }
-    @media (max-width: 800px) {
-      .player-row { grid-template-columns: 1fr 1fr; }
+    .toolbar a {
+      color: #64a8ff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 4px;
+      border-radius: 6px;
     }
-    .player-row small { color: var(--muted); display: block; margin-top: 4px; font-size: 12px; word-break: break-all; }
-    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
-    a { color: var(--accent); }
+    .toolbar a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .toolbar .sep { color: var(--border); user-select: none; }
+    #statusMsg { min-height: 1.2em; }
+    .team-tabs {
+      display: inline-flex;
+      padding: 3px;
+      background: var(--card-inner);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      gap: 2px;
+      margin: 0 0 20px;
+    }
+    .team-tabs button {
+      min-width: 110px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 7px;
+    }
+    .team-tabs button.is-active { background: rgba(10, 132, 255, 0.22); color: #e8f0ff; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .team-tabs button:not(.is-active):hover { color: var(--text); }
+    .player-list { display: flex; flex-direction: column; gap: 14px; }
+    .player-card {
+      display: grid;
+      grid-template-columns: 1fr 88px 120px 1fr 1fr auto;
+      gap: 14px 16px;
+      align-items: start;
+      padding: 18px 18px 16px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    }
+    @media (max-width: 960px) {
+      .player-card { grid-template-columns: 1fr 1fr; grid-auto-flow: dense; }
+      .player-card__actions { grid-column: 1 / -1; justify-self: end; }
+    }
+    @media (max-width: 640px) {
+      .player-card { grid-template-columns: 1fr; }
+    }
+    .player-card .field--staff { margin-top: 4px; }
+    .media-block { min-width: 0; }
+    .media-block .file-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+    .media-block input[type="file"] {
+      max-width: 100%;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .media-block small a { font-size: 12px; word-break: break-all; }
+    .media-preview {
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0c0c0e;
+      border: 1px solid var(--border);
+      min-height: 96px;
+      max-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .media-preview--empty { color: var(--muted); font-size: 12px; font-weight: 500; padding: 20px; }
+    .media-preview__img,
+    .media-preview__video { display: block; width: 100%; max-height: 180px; object-fit: contain; background: #000; }
+    .media-preview__video { max-height: 200px; }
+    .media-preview__broken { margin: 0; padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
+    .media-preview__foot { width: 100%; padding: 6px 10px; background: rgba(0,0,0,0.35); border-top: 1px solid var(--border); }
+    .media-preview__foot a { font-size: 12px; font-weight: 500; }
+    .player-card__actions { display: flex; align-items: flex-start; padding-top: 24px; }
+    .add-panel { margin-top: 8px; padding: 18px; background: var(--card-inner); border: 1px solid var(--border); border-radius: 14px; }
+    a { color: #64a8ff; }
   </style>
 </head>
 <body>
@@ -135,10 +233,10 @@
         <button type="button" class="btn-ghost" id="btnLogout">Útskrá</button>
         <button type="button" class="btn-primary" id="btnSaveRoster">Vista stigatöflu (JSON)</button>
         <a href="../kr/index.html">Stjórnborð KR</a>
-        <span>·</span>
+        <span class="sep" aria-hidden="true">·</span>
         <a href="../keflavik/index.html">Stjórnborð Keflavík</a>
       </div>
-      <p class="sub" id="statusMsg" style="margin:0 0 12px"></p>
+      <p class="sub" id="statusMsg" style="margin:0 0 20px; min-height:1.2em"></p>
 
       <div class="team-tabs" role="tablist">
         <button type="button" class="is-active" data-team="kr" id="tabKr">KR</button>
@@ -146,23 +244,25 @@
       </div>
 
       <h2>Leikmenn / starfsfólk</h2>
-      <div id="playerList"></div>
+      <div id="playerList" class="player-list"></div>
 
-      <h2 style="margin-top:24px">Bæta við leikmanni</h2>
-      <div class="row">
-        <div class="field">
-          <label for="addName">Nafn *</label>
-          <input id="addName" type="text" />
+      <h2 style="margin-top:28px">Bæta við leikmanni</h2>
+      <div class="add-panel">
+        <div class="row" style="margin-bottom:0">
+          <div class="field">
+            <label for="addName">Nafn *</label>
+            <input id="addName" type="text" />
+          </div>
+          <div class="field">
+            <label for="addNumber">Númer</label>
+            <input id="addNumber" type="number" min="0" max="99" />
+          </div>
+          <div class="field field--inline" style="padding-top:20px">
+            <input id="addStaff" type="checkbox" />
+            <label for="addStaff">Þjálfari / starfsmaður</label>
+          </div>
+          <button type="button" class="btn-primary" id="btnAdd">Bæta við</button>
         </div>
-        <div class="field">
-          <label for="addNumber">Númer</label>
-          <input id="addNumber" type="number" min="0" max="99" />
-        </div>
-        <div class="field" style="flex-direction:row;align-items:center;gap:8px;padding-top:22px">
-          <input id="addStaff" type="checkbox" />
-          <label for="addStaff" style="margin:0">Þjálfari / starfsmaður</label>
-        </div>
-        <button type="button" class="btn-primary" id="btnAdd">Bæta við</button>
       </div>
     </div>
   </div>
@@ -406,40 +506,112 @@
       return rosterData[currentTeam] || (rosterData[currentTeam] = []);
     }
 
+    function mediaKindFromUrl(url) {
+      const s = String(url).split("?")[0].toLowerCase();
+      if (/\.(jpe?g|png|gif|webp|avif|bmp|svg)$/.test(s)) return "image";
+      if (/\.(mp4|webm|m4v|mov|ogv)$/.test(s)) return "video";
+      return "unknown";
+    }
+
+    function mediaPreviewBlock(url) {
+      if (!url || !String(url).trim()) {
+        return '<div class="media-preview media-preview--empty" aria-hidden="true">Engin forskoðun</div>';
+      }
+      const u = escapeAttr(url);
+      const k = mediaKindFromUrl(url);
+      const foot = `<div class="media-preview__foot"><a href="${u}" target="_blank" rel="noopener">Opna tengil</a></div>`;
+      if (k === "image" || k === "unknown") {
+        return (
+          '<div class="media-preview" data-k="' +
+          escapeAttr(k) +
+          '">' +
+          '<img class="media-preview__img js-media-thumb" src="' +
+          u +
+          '" alt="" loading="lazy" decoding="async" />' +
+          '<p class="media-preview__broken" hidden>Forskoðun tókst ekki — notaðu tengil fyrir neðan</p>' +
+          foot +
+          "</div>"
+        );
+      }
+      if (k === "video") {
+        return (
+          '<div class="media-preview" data-k="video">' +
+          '<video class="media-preview__video js-media-video" src="' +
+          u +
+          '" controls muted playsinline preload="metadata"></video>' +
+          '<p class="media-preview__broken" hidden>Ekki tókst að spila hér — notaðu tengil fyrir neðan</p>' +
+          foot +
+          "</div>"
+        );
+      }
+      return (
+        '<div class="media-preview" data-k="other"><a class="media-preview--empty" href="' +
+        u +
+        '" target="_blank" rel="noopener" style="display:block;padding:20px">Opna tengil</a></div>'
+      );
+    }
+
+    function wireMediaPreviews(root) {
+      root.querySelectorAll(".js-media-thumb").forEach((img) => {
+        if (img.dataset.wired) return;
+        img.dataset.wired = "1";
+        img.addEventListener("error", function () {
+          this.style.display = "none";
+          const p = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
+          if (p) p.hidden = false;
+        });
+      });
+      root.querySelectorAll(".js-media-video").forEach((vid) => {
+        if (vid.dataset.wired) return;
+        vid.dataset.wired = "1";
+        vid.addEventListener("error", function () {
+          this.style.display = "none";
+          const p = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
+          if (p) p.hidden = false;
+        });
+      });
+    }
+
     function render() {
       const list = currentList();
       const host = $("playerList");
       host.innerHTML = "";
       for (const p of list) {
-        const row = document.createElement("div");
-        row.className = "player-row";
+        const idSafe = escapeAttr(p.id);
+        const row = document.createElement("article");
+        row.className = "player-card";
+        row.setAttribute("data-player-id", p.id);
         row.innerHTML = `
           <div class="field">
             <label>Nafn</label>
-            <input type="text" data-k="name" data-id="${p.id}" value="${escapeAttr(p.name)}" />
+            <input type="text" data-k="name" data-id="${idSafe}" value="${escapeAttr(p.name)}" />
           </div>
           <div class="field">
             <label>Nr.</label>
-            <input type="number" data-k="number" data-id="${p.id}" value="${p.number == null ? "" : p.number}" min="0" max="99" />
+            <input type="number" data-k="number" data-id="${idSafe}" value="${p.number == null ? "" : p.number}" min="0" max="99" />
           </div>
-          <div class="field" style="flex-direction:row;align-items:center;gap:6px">
-            <input type="checkbox" data-k="isStaff" data-id="${p.id}" ${p.isStaff ? "checked" : ""} id="s-${escapeAttr(p.id)}" />
-            <label for="s-${escapeAttr(p.id)}" style="margin:0">Þjálfari</label>
+          <div class="field field--staff field--inline" style="padding-top:2px">
+            <input type="checkbox" data-k="isStaff" data-id="${idSafe}" ${p.isStaff ? "checked" : ""} id="s-${idSafe}" />
+            <label for="s-${idSafe}">Þjálfari</label>
           </div>
-          <div class="field">
+          <div class="field media-block">
             <label>Kynning (mynd / myndband)</label>
-            <input type="file" data-kind="intro" data-id="${p.id}" accept="image/*,video/*" />
-            <small>Kynning: ${p.introUrl ? linkify(p.introUrl) : "—"}</small>
-            <button type="button" class="btn-ghost" data-rm="intro" data-id="${p.id}" style="margin-top:4px">Hreinsa kynningu</button>
+            <div class="file-line">
+              <input type="file" data-kind="intro" data-id="${idSafe}" accept="image/*,video/*" />
+              <button type="button" class="btn-ghost" data-rm="intro" data-id="${idSafe}">Hreinsa kynningu</button>
+            </div>
+            ${mediaPreviewBlock(p.introUrl)}
           </div>
-          <div class="field">
+          <div class="field media-block">
             <label>Mark hátíð</label>
-            <input type="file" data-kind="goal" data-id="${p.id}" accept="image/*,video/*" />
-            <small>Mark: ${p.goalUrl ? linkify(p.goalUrl) : "—"}</small>
-            <button type="button" class="btn-ghost" data-rm="goal" data-id="${p.id}" style="margin-top:4px">Hreinsa mark</button>
+            <div class="file-line">
+              <input type="file" data-kind="goal" data-id="${idSafe}" accept="image/*,video/*" />
+              <button type="button" class="btn-ghost" data-rm="goal" data-id="${idSafe}">Hreinsa mark</button>
+            </div>
+            ${mediaPreviewBlock(p.goalUrl)}
           </div>
-          <div>
-            <button type="button" class="btn-danger" data-del="${p.id}">Eyða</button>
+          <div class="player-card__actions">
+            <button type="button" class="btn-danger" data-del="${idSafe}">Eyða leikmanni</button>
           </div>
         `;
         host.appendChild(row);
@@ -459,13 +631,11 @@
       host.querySelectorAll("button[data-del]").forEach((b) => {
         b.addEventListener("click", onDeletePlayer);
       });
+      wireMediaPreviews(host);
     }
 
     function escapeAttr(s) {
       return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-    }
-    function linkify(url) {
-      return `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">opna</a>`;
     }
 
     function onFieldChange(e) {
