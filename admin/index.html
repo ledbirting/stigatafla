@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stigatafla — Leikmannastillingar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --card: #1c1c1f;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --accent: #0a84ff;
+      --danger: #ff453a;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 48px; }
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
+    .sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; line-height: 1.45; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      max-width: 360px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #141416;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+    }
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+    .row label { margin-bottom: 0; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    button {
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #2c2c2e;
+      color: var(--text);
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #3a3a3c; }
+    button.btn-primary { background: rgba(10, 132, 255, 0.2); border-color: rgba(10, 132, 255, 0.5); color: #b0d4ff; }
+    button.btn-danger { background: rgba(255, 69, 58, 0.12); border-color: rgba(255, 69, 58, 0.4); color: #ff8a83; }
+    button.btn-ghost { background: transparent; }
+    [hidden] { display: none !important; }
+    .err { color: #ff8a83; font-size: 14px; margin-top: 8px; }
+    .ok { color: #5be27a; font-size: 14px; margin-top: 8px; }
+    .team-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .team-tabs button { min-width: 100px; }
+    .team-tabs button.is-active { background: rgba(10, 132, 255, 0.25); border-color: var(--accent); }
+    .player-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 80px 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    @media (max-width: 800px) {
+      .player-row { grid-template-columns: 1fr 1fr; }
+    }
+    .player-row small { color: var(--muted); display: block; margin-top: 4px; font-size: 12px; word-break: break-all; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Leikmannastillingar (Stigatafla)</h1>
+    <p class="sub">
+      Innskráning með sameinuðu notanda úr Supabase. JSON og myndir fara í Storage eftir stefnum.
+    </p>
+
+    <div id="configMissing" class="card" hidden>
+      <p>Búðu til <code>admin/config.js</code> (afrit af <code>config.example.js</code>) með tengingum að Supabase.</p>
+    </div>
+
+    <div id="loginCard" class="card">
+      <h2>Innskráning</h2>
+      <form id="loginForm">
+        <div class="row">
+          <div class="field">
+            <label for="email">Netfang</label>
+            <input id="email" type="email" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="password">Lykilorð</label>
+            <input id="password" type="password" autocomplete="current-password" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" id="btnLogin">Innskrá</button>
+        <div class="err" id="loginErr" hidden></div>
+      </form>
+    </div>
+
+    <div id="appCard" class="card" hidden>
+      <div class="toolbar">
+        <span id="userLabel" class="sub" style="margin:0"></span>
+        <button type="button" class="btn-ghost" id="btnLogout">Útskrá</button>
+        <button type="button" class="btn-primary" id="btnSaveRoster">Vista stigatöflu (JSON)</button>
+        <a href="../kr/index.html">Stjórnborð KR</a>
+        <span>·</span>
+        <a href="../keflavik/index.html">Stjórnborð Keflavík</a>
+      </div>
+      <p class="sub" id="statusMsg" style="margin:0 0 12px"></p>
+
+      <div class="team-tabs" role="tablist">
+        <button type="button" class="is-active" data-team="kr" id="tabKr">KR</button>
+        <button type="button" data-team="keflavik" id="tabKef">Keflavík</button>
+      </div>
+
+      <h2>Leikmenn / starfsfólk</h2>
+      <div id="playerList"></div>
+
+      <h2 style="margin-top:24px">Bæta við leikmanni</h2>
+      <div class="row">
+        <div class="field">
+          <label for="addName">Nafn *</label>
+          <input id="addName" type="text" />
+        </div>
+        <div class="field">
+          <label for="addNumber">Númer</label>
+          <input id="addNumber" type="number" min="0" max="99" />
+        </div>
+        <div class="field" style="flex-direction:row;align-items:center;gap:8px;padding-top:22px">
+          <input id="addStaff" type="checkbox" />
+          <label for="addStaff" style="margin:0">Þjálfari / starfsmaður</label>
+        </div>
+        <button type="button" class="btn-primary" id="btnAdd">Bæta við</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../rosters.js"></script>
+  <script>
+    window.STIGATAFLA_ADMIN_CONFIG = {
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      bucket: "stigatafla",
+      rostersPath: "stigatafla/rosters.json",
+      mediaPathPrefix: "stigatafla/media",
+    };
+  </script>
+  <script src="config.js" onerror="void 0"></script>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+    const TEAMS = ["kr", "keflavik"];
+    let supabase = null;
+    let cfg = null;
+    let rosterData = { kr: [], keflavik: [] };
+    let currentTeam = "kr";
+    let rosterLoadedOnce = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    cfg = window.STIGATAFLA_ADMIN_CONFIG;
+    if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+      $("configMissing").hidden = false;
+      $("loginCard").hidden = true;
+    } else {
+      supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+        auth: { persistSession: true, autoRefreshToken: true },
+      });
+    }
+
+    function newPlayerId() {
+      return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+
+    function publicUrlForPath(path) {
+      const { data } = supabase.storage.from(cfg.bucket).getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function normalizeRosterObject(raw) {
+      const out = { kr: [], keflavik: [] };
+      if (!raw || typeof raw !== "object") return out;
+      for (const k of TEAMS) {
+        if (Array.isArray(raw[k])) out[k] = raw[k].map(normalizePlayer);
+      }
+      return out;
+    }
+
+    function normalizePlayer(p) {
+      if (!p || typeof p !== "object") return null;
+      return {
+        id: String(p.id || newPlayerId()),
+        name: String(p.name || ""),
+        number: p.number == null || p.number === "" ? null : Number(p.number),
+        isStaff: !!p.isStaff,
+        introUrl: p.introUrl ? String(p.introUrl) : "",
+        goalUrl: p.goalUrl ? String(p.goalUrl) : "",
+        introStoragePath: p.introStoragePath ? String(p.introStoragePath) : "",
+        goalStoragePath: p.goalStoragePath ? String(p.goalStoragePath) : "",
+      };
+    }
+
+    function stripForJson(data) {
+      const o = JSON.parse(JSON.stringify(data));
+      for (const t of TEAMS) {
+        o[t] = (o[t] || []).map((p) => {
+          const x = { ...p };
+          if (!x.introStoragePath) delete x.introStoragePath;
+          if (!x.goalStoragePath) delete x.goalStoragePath;
+          return x;
+        });
+      }
+      return o;
+    }
+
+    function showStatus(s, isErr) {
+      const el = $("statusMsg");
+      el.textContent = s || "";
+      el.style.color = isErr ? "#ff8a83" : "var(--muted)";
+    }
+
+    async function loadRostersFromStorage() {
+      const { data: blob, error } = await supabase.storage.from(cfg.bucket).download(cfg.rostersPath);
+      if (error) {
+        if (error.message && /not found|404/i.test(String(error.message))) {
+          const seed = window.STIGATAFLA_ROSTERS_DEFAULT || { kr: [], keflavik: [] };
+          rosterData = normalizeRosterObject(JSON.parse(JSON.stringify(seed)));
+          showStatus("Engin rosters.json fannst — nota föst grunngögn. Vista til að búa til skrá.");
+          return;
+        }
+        throw error;
+      }
+      const text = await blob.text();
+      const j = JSON.parse(text);
+      rosterData = normalizeRosterObject(j);
+    }
+
+    async function saveRostersToStorage() {
+      const payload = JSON.stringify(stripForJson(rosterData), null, 2);
+      const blob = new Blob([payload], { type: "application/json" });
+      const { error } = await supabase.storage
+        .from(cfg.bucket)
+        .upload(cfg.rostersPath, blob, { contentType: "application/json; charset=utf-8", upsert: true });
+      if (error) throw error;
+      showStatus("Vistað í " + cfg.rostersPath, false);
+    }
+
+    function currentList() {
+      return rosterData[currentTeam] || (rosterData[currentTeam] = []);
+    }
+
+    function render() {
+      const list = currentList();
+      const host = $("playerList");
+      host.innerHTML = "";
+      for (const p of list) {
+        const row = document.createElement("div");
+        row.className = "player-row";
+        row.innerHTML = `
+          <div class="field">
+            <label>Nafn</label>
+            <input type="text" data-k="name" data-id="${p.id}" value="${escapeAttr(p.name)}" />
+          </div>
+          <div class="field">
+            <label>Nr.</label>
+            <input type="number" data-k="number" data-id="${p.id}" value="${p.number == null ? "" : p.number}" min="0" max="99" />
+          </div>
+          <div class="field" style="flex-direction:row;align-items:center;gap:6px">
+            <input type="checkbox" data-k="isStaff" data-id="${p.id}" ${p.isStaff ? "checked" : ""} id="s-${escapeAttr(p.id)}" />
+            <label for="s-${escapeAttr(p.id)}" style="margin:0">Þjálfari</label>
+          </div>
+          <div class="field">
+            <label>Kynning (mynd / myndband)</label>
+            <input type="file" data-kind="intro" data-id="${p.id}" accept="image/*,video/*" />
+            <small>Kynning: ${p.introUrl ? linkify(p.introUrl) : "—"}</small>
+            <button type="button" class="btn-ghost" data-rm="intro" data-id="${p.id}" style="margin-top:4px">Hreinsa kynningu</button>
+          </div>
+          <div class="field">
+            <label>Mark hátíð</label>
+            <input type="file" data-kind="goal" data-id="${p.id}" accept="image/*,video/*" />
+            <small>Mark: ${p.goalUrl ? linkify(p.goalUrl) : "—"}</small>
+            <button type="button" class="btn-ghost" data-rm="goal" data-id="${p.id}" style="margin-top:4px">Hreinsa mark</button>
+          </div>
+          <div>
+            <button type="button" class="btn-danger" data-del="${p.id}">Eyða</button>
+          </div>
+        `;
+        host.appendChild(row);
+      }
+      host.querySelectorAll("input[type=text],input[type=number]").forEach((inp) => {
+        inp.addEventListener("change", onFieldChange);
+      });
+      host.querySelectorAll("input[type=checkbox][data-k]").forEach((inp) => {
+        inp.addEventListener("change", onFieldChange);
+      });
+      host.querySelectorAll("input[type=file]").forEach((inp) => {
+        inp.addEventListener("change", onFilePick);
+      });
+      host.querySelectorAll("button[data-rm]").forEach((b) => {
+        b.addEventListener("click", onRemoveAsset);
+      });
+      host.querySelectorAll("button[data-del]").forEach((b) => {
+        b.addEventListener("click", onDeletePlayer);
+      });
+    }
+
+    function escapeAttr(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    }
+    function linkify(url) {
+      return `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">opna</a>`;
+    }
+
+    function onFieldChange(e) {
+      const id = e.target.getAttribute("data-id");
+      const k = e.target.getAttribute("data-k");
+      const pl = findPlayer(id);
+      if (!pl) return;
+      if (k === "name") pl.name = e.target.value;
+      if (k === "number") {
+        const v = e.target.value;
+        pl.number = v === "" ? null : Number(v);
+      }
+      if (k === "isStaff") pl.isStaff = e.target.checked;
+    }
+
+    function findPlayer(id) {
+      return currentList().find((x) => x.id === id);
+    }
+
+    async function onFilePick(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const id = e.target.getAttribute("data-id");
+      const kind = e.target.getAttribute("data-kind");
+      const pl = findPlayer(id);
+      if (!pl) return;
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${cfg.mediaPathPrefix}/${currentTeam}/${id}-${kind}.${safeExt}`;
+      showStatus("Hleð upp…", false);
+      const { error: upErr } = await supabase.storage.from(cfg.bucket).upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: true,
+      });
+      if (upErr) {
+        showStatus(upErr.message, true);
+        return;
+      }
+      const url = publicUrlForPath(path);
+      if (kind === "intro") {
+        if (pl.introStoragePath && pl.introStoragePath !== path) {
+          await supabase.storage.from(cfg.bucket).remove([pl.introStoragePath]).catch(() => {});
+        }
+        pl.introUrl = url;
+        pl.introStoragePath = path;
+      } else {
+        if (pl.goalStoragePath && pl.goalStoragePath !== path) {
+          await supabase.storage.from(cfg.bucket).remove([pl.goalStoragePath]).catch(() => {});
+        }
+        pl.goalUrl = url;
+        pl.goalStoragePath = path;
+      }
+      e.target.value = "";
+      showStatus("Upphleðsla lokið — mundu að vista stigatöfluna.", false);
+      render();
+    }
+
+    async function onRemoveAsset(e) {
+      const id = e.target.getAttribute("data-id");
+      const kind = e.target.getAttribute("data-rm");
+      const pl = findPlayer(id);
+      if (!pl) return;
+      const path = kind === "intro" ? pl.introStoragePath : pl.goalStoragePath;
+      if (path) {
+        await supabase.storage.from(cfg.bucket).remove([path]).catch(() => {});
+      }
+      if (kind === "intro") {
+        pl.introUrl = "";
+        pl.introStoragePath = "";
+      } else {
+        pl.goalUrl = "";
+        pl.goalStoragePath = "";
+      }
+      showStatus("Hreinsað — vista stigatöfluna.", false);
+      render();
+    }
+
+    function onDeletePlayer(e) {
+      const id = e.target.getAttribute("data-del");
+      const pl = findPlayer(id);
+      if (!pl || !confirm("Eyða þessum leikmanni úr gagnagrunn?")) return;
+      if (pl.introStoragePath) supabase.storage.from(cfg.bucket).remove([pl.introStoragePath]);
+      if (pl.goalStoragePath) supabase.storage.from(cfg.bucket).remove([pl.goalStoragePath]);
+      const arr = currentList();
+      const i = arr.findIndex((x) => x.id === id);
+      if (i >= 0) arr.splice(i, 1);
+      showStatus("Leikmaður fjarlægður — vista til að geyma.", false);
+      render();
+    }
+
+    function switchTeam(team) {
+      currentTeam = team;
+      document.querySelectorAll(".team-tabs button").forEach((b) => {
+        b.classList.toggle("is-active", b.getAttribute("data-team") === team);
+      });
+      render();
+    }
+
+    $("tabKr").addEventListener("click", () => switchTeam("kr"));
+    $("tabKef").addEventListener("click", () => switchTeam("keflavik"));
+
+    $("btnAdd").addEventListener("click", () => {
+      const name = $("addName").value.trim();
+      if (!name) {
+        showStatus("Settu inn nafn.", true);
+        return;
+      }
+      const num = $("addNumber").value;
+      const pl = {
+        id: newPlayerId(),
+        name,
+        number: num === "" ? null : Number(num),
+        isStaff: $("addStaff").checked,
+        introUrl: "",
+        goalUrl: "",
+        introStoragePath: "",
+        goalStoragePath: "",
+      };
+      currentList().push(pl);
+      $("addName").value = "";
+      $("addNumber").value = "";
+      $("addStaff").checked = false;
+      showStatus("Bætt við — vista stigatöfluna.", false);
+      render();
+    });
+
+    $("btnSaveRoster").addEventListener("click", async () => {
+      if (!supabase) return;
+      showStatus("Vista…", false);
+      try {
+        await saveRostersToStorage();
+      } catch (err) {
+        showStatus(String(err && err.message ? err.message : err), true);
+      }
+    });
+
+    $("loginForm")?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      if (!supabase) return;
+      const err = $("loginErr");
+      err.hidden = true;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value,
+      });
+      if (error) {
+        err.textContent = error.message;
+        err.hidden = false;
+        return;
+      }
+    });
+
+    $("btnLogout")?.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+    });
+
+    function showApp(session) {
+      const email = session?.user?.email || "";
+      $("userLabel").textContent = email ? "Þú ert innskáð(ur): " + email : "";
+      $("loginCard").hidden = true;
+      $("appCard").hidden = false;
+    }
+
+    function showLogin() {
+      $("loginCard").hidden = false;
+      $("appCard").hidden = true;
+    }
+
+    if (supabase) {
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session) {
+          showApp(session);
+          if (!rosterLoadedOnce) {
+            rosterLoadedOnce = true;
+            try {
+              showStatus("Hleð stigatöflu…", false);
+              await loadRostersFromStorage();
+              render();
+              showStatus("", false);
+            } catch (e) {
+              showStatus(String(e && e.message ? e.message : e), true);
+            }
+          }
+        } else {
+          rosterLoadedOnce = false;
+          showLogin();
+        }
+      });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        showApp(session);
+        if (!rosterLoadedOnce) {
+          rosterLoadedOnce = true;
+          try {
+            showStatus("Hleð stigatöflu…", false);
+            await loadRostersFromStorage();
+            render();
+            showStatus("", false);
+          } catch (e) {
+            showStatus(String(e && e.message ? e.message : e), true);
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
