@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stigatafla — Leikmannastillingar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://esm.sh" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -181,7 +182,7 @@
     onerror="console.error('Stigatafla admin: config.js skrá tókst ekki að hlaða (404 eða röðuð út). Skoðaðu Network og athugaðu .gitignore / slóð.')"
   ></script>
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1?bundle";
 
     const pageBase = import.meta.url;
 
@@ -350,10 +351,6 @@
     }
 
     async function loadRostersFromStorage() {
-      console.info(
-        "[Stigatafla admin] Sæki rosters úr Supabase Storage (opna undir Network → Filter „Fetch/XHR“ eða leitaðu að þínu Supabase-vélarnafni, t.d. media.zapp.is):",
-        { bucket: cfg.bucket, rostersPath: cfg.rostersPath }
-      );
       const { data: blob, error } = await supabase.storage.from(cfg.bucket).download(cfg.rostersPath);
       if (error) {
         if (isRosterObjectMissingError(error)) {
