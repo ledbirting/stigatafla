@@ -237,13 +237,39 @@
 
     const $ = (id) => document.getElementById(id);
 
+    /**
+     * Custom API domains (e.g. https://media.zapp.is) make supabase-js default to
+     * `sb-${hostname.split('.')[0]}-auth-token` (e.g. sb-media-auth-token). The default
+     * project URL instead uses the project ref (sb-<ref>-auth-token). That mismatch
+     * breaks session handling; align with the ref from the legacy anon JWT (or cfg.projectRef).
+     */
+    function supabaseSessionStorageKey(anonKey, config) {
+      if (config && config.projectRef) return "sb-" + String(config.projectRef) + "-auth-token";
+      if (!anonKey || typeof anonKey !== "string") return undefined;
+      const parts = anonKey.split(".");
+      if (parts.length !== 3) return undefined;
+      try {
+        const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const pad = b64.length % 4;
+        const padded = b64 + (pad ? "=".repeat(4 - pad) : "");
+        const p = JSON.parse(atob(padded));
+        if (p && p.ref) return "sb-" + p.ref + "-auth-token";
+      } catch (_) {}
+      return undefined;
+    }
+
     cfg = window.STIGATAFLA_ADMIN_CONFIG;
     if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
       $("configMissing").hidden = false;
       $("loginCard").hidden = true;
     } else {
+      const storageKey = supabaseSessionStorageKey(cfg.supabaseAnonKey, cfg);
       supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
-        auth: { persistSession: true, autoRefreshToken: true },
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          ...(storageKey ? { storageKey } : {}),
+        },
       });
     }
 
