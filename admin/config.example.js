@@ -1,5 +1,6 @@
 /**
- * Copy to config.js (gitignored). Only staff should have this file with real keys.
+ * Copy to `config.js` in this folder. Only staff need the real file in the project.
+ * `admin/config.js` is not gitignored (anon key is public; RLS + Auth protect data).
  *
  * From Supabase Dashboard → Settings → API you need:
  *   • Project URL

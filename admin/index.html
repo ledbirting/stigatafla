@@ -102,7 +102,10 @@
     </p>
 
     <div id="configMissing" class="card" hidden>
-      <p>Búðu til <code>admin/config.js</code> (afrit af <code>config.example.js</code>) með tengingum að Supabase.</p>
+      <p>Engin gild Supabase tenging fannst eða <code>config.js</code> tókst ekki að hlaða.</p>
+      <p class="sub" style="margin:12px 0 0; line-height:1.5">
+        Búðu til <code>admin/config.js</code> (afrit af <code>config.example.js</code>). Ef skráin er rétt: opna <strong>Network</strong> (F12) — <code>config.js</code> ætti að koma með <strong>200</strong> (ekki 404). Ef <code>config.js</code> er á disk en forskoðan sýnir 404, var skráin oft í <code>.gitignore</code> — hún er nú tekin úr <code>.gitignore</code> í þessu verkefni. Prófaðu einnig <code>npx http-server</code> úr rót verkefnisins.
+      </p>
     </div>
 
     <div id="loginCard" class="card">
@@ -173,9 +176,57 @@
       mediaPathPrefix: "stigatafla/media",
     };
   </script>
-  <script src="config.js" onerror="void 0"></script>
+  <script
+    src="config.js"
+    onerror="console.error('Stigatafla admin: config.js skrá tókst ekki að hlaða (404 eða röðuð út). Skoðaðu Network og athugaðu .gitignore / slóð.')"
+  ></script>
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+    const pageBase = import.meta.url;
+
+    function adminConfigIsValid(c) {
+      return !!(c && c.supabaseUrl && c.supabaseAnonKey);
+    }
+
+    function injectConfigFromText(text) {
+      const t = String(text).replace(/^\uFEFF/, "");
+      const s = document.createElement("script");
+      s.text = t;
+      document.documentElement.appendChild(s);
+    }
+
+    async function ensureAdminConfigLoaded() {
+      if (adminConfigIsValid(window.STIGATAFLA_ADMIN_CONFIG)) return true;
+      const names = ["config.js", "config.local.js"];
+      for (const name of names) {
+        const url = new URL(name, pageBase).href;
+        let res;
+        try {
+          res = await fetch(url, { cache: "no-store" });
+        } catch (e) {
+          console.warn("Stigatafla admin: fetch", url, e);
+          continue;
+        }
+        if (!res.ok) {
+          console.warn("Stigatafla admin: fetch", name, "→", res.status);
+          continue;
+        }
+        try {
+          injectConfigFromText(await res.text());
+        } catch (e) {
+          console.error("Stigatafla admin: keyrsla á", name, e);
+          continue;
+        }
+        if (adminConfigIsValid(window.STIGATAFLA_ADMIN_CONFIG)) return true;
+      }
+      return false;
+    }
+
+    const ok = await ensureAdminConfigLoaded();
+    if (!ok) {
+      console.warn("Stigatafla admin: engin gild Supabase stilling. Lesdu skilaboðin í „configMissing“-reit.");
+    }
 
     const TEAMS = ["kr", "keflavik"];
     let supabase = null;

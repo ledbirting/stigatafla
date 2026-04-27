@@ -1,2 +1,3 @@
 node_modules/
-admin/config.js
+# Optional local-only override (e.g. extra secrets); main config is admin/config.js
+admin/config.local.js
