@@ -350,6 +350,10 @@
     }
 
     async function loadRostersFromStorage() {
+      console.info(
+        "[Stigatafla admin] Sæki rosters úr Supabase Storage (opna undir Network → Filter „Fetch/XHR“ eða leitaðu að þínu Supabase-vélarnafni, t.d. media.zapp.is):",
+        { bucket: cfg.bucket, rostersPath: cfg.rostersPath }
+      );
       const { data: blob, error } = await supabase.storage.from(cfg.bucket).download(cfg.rostersPath);
       if (error) {
         if (isRosterObjectMissingError(error)) {
@@ -371,6 +375,25 @@
       "Gat ekki hlaða stigatöflunni innan " +
       ROSTER_LOAD_TIMEOUT_MS / 1000 +
       " s. Athugaðu net, að Storage sé virkt og að nafn á bucket/leið (config) sé rétt. Endurhlaða síðu er öruggt eftir að hafa lagað tengingar.";
+
+    /** Ein könn hleðsla — notað eftir innskráningu, getSession og onAuthStateChange (kemur í veg fyrir að Storage-beiðni sleppi algerlega). */
+    async function loadRostersIfNeeded() {
+      if (rosterLoadedOnce) return;
+      rosterLoadedOnce = true;
+      try {
+        showStatus("Hleð stigatöflu…", false);
+        const { fromSeed } = await withTimeout(
+          loadRostersFromStorage(),
+          ROSTER_LOAD_TIMEOUT_MS,
+          ROSTER_LOAD_TIMEOUT_MSG
+        );
+        render();
+        if (!fromSeed) showStatus("", false);
+      } catch (e) {
+        rosterLoadedOnce = false;
+        showStatus(String(e && e.message ? e.message : e), true);
+      }
+    }
 
     async function saveRostersToStorage() {
       const payload = JSON.stringify(stripForJson(rosterData), null, 2);
@@ -599,6 +622,14 @@
             ? "Gat ekki tengst Supabase (net/villa á slóð). Athugaðu netið, og að `supabaseUrl` í `admin/config.js` sé nákvæmlega Project URL frá Supabase (Settings → API) — röng eða ekki-til vísitala verkefnisins gefur t.d. ERR_NAME_NOT_RESOLVED."
             : m;
           err.hidden = false;
+        } else {
+          const {
+            data: { session: afterLogin },
+          } = await supabase.auth.getSession();
+          if (afterLogin) {
+            showApp(afterLogin);
+            await loadRostersIfNeeded();
+          }
         }
       } catch (e) {
         const msg = String(e && e.message ? e.message : e);
@@ -630,22 +661,7 @@
       supabase.auth.onAuthStateChange(async (event, session) => {
         if (session) {
           showApp(session);
-          if (!rosterLoadedOnce) {
-            rosterLoadedOnce = true;
-            try {
-              showStatus("Hleð stigatöflu…", false);
-              const { fromSeed } = await withTimeout(
-                loadRostersFromStorage(),
-                ROSTER_LOAD_TIMEOUT_MS,
-                ROSTER_LOAD_TIMEOUT_MSG
-              );
-              render();
-              if (!fromSeed) showStatus("", false);
-            } catch (e) {
-              rosterLoadedOnce = false;
-              showStatus(String(e && e.message ? e.message : e), true);
-            }
-          }
+          await loadRostersIfNeeded();
         } else {
           rosterLoadedOnce = false;
           showLogin();
@@ -656,22 +672,7 @@
       } = await supabase.auth.getSession();
       if (session) {
         showApp(session);
-        if (!rosterLoadedOnce) {
-          rosterLoadedOnce = true;
-          try {
-            showStatus("Hleð stigatöflu…", false);
-            const { fromSeed } = await withTimeout(
-              loadRostersFromStorage(),
-              ROSTER_LOAD_TIMEOUT_MS,
-              ROSTER_LOAD_TIMEOUT_MSG
-            );
-            render();
-            if (!fromSeed) showStatus("", false);
-          } catch (e) {
-            rosterLoadedOnce = false;
-            showStatus(String(e && e.message ? e.message : e), true);
-          }
-        }
+        await loadRostersIfNeeded();
       }
     }
   </script>
