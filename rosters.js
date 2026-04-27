@@ -11,7 +11,7 @@
     return { introUrl: u, goalUrl: u };
   }
 
-  global.STIGATAFLA_ROSTERS = {
+  var ROSTERS = {
     kr: [
       { id: "p0", name: "Óskar Hrafn Þorvaldsson", number: 0, isStaff: true, ...krImg("0-Oskar.jpg") },
       { id: "p1", name: "Arnar Freyr Ólafsson", number: 1, ...krImg("1-Arnar.jpg") },
@@ -50,4 +50,6 @@
       { id: "kef-manager", name: "Þjálfari", isStaff: true, number: null, introUrl: "", goalUrl: "" },
     ],
   };
+  global.STIGATAFLA_ROSTERS_DEFAULT = ROSTERS;
+  global.STIGATAFLA_ROSTERS = ROSTERS;
 })(typeof window !== "undefined" ? window : this);

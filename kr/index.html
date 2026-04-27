@@ -953,6 +953,7 @@
           <h2 id="intro-launch-heading">Kynningar</h2>
           <p class="controls__intro-launch-hint">Haka við hver á leikjaplatta (liðslista), raða með drætti, og stjórna kynningu undir.</p>
           <button type="button" class="controls__btn controls__btn--block" id="btnOpenIntroPanel">Opna kynningaglugga</button>
+          <p class="controls__subhead" style="margin-top:8px"><a href="../admin/index.html" style="color:var(--chrome-hint);font-size:14px">Leikmennastillingar (innskráning)</a></p>
         </section>
         </div>
       </div>
@@ -1005,6 +1006,8 @@
 
   <script src="../teams.js"></script>
   <script src="../rosters.js"></script>
+  <script src="../stigatafla.config.js"></script>
+  <script src="../roster-loader.js"></script>
   <script src="../player-media.js"></script>
   <script>
     (function () {
@@ -1068,7 +1071,7 @@
       var goalPickerCancel = document.getElementById("goalPickerCancel");
       var goalPickerUnknown = document.getElementById("goalPickerUnknown");
 
-      var rosterByTeam = STIGATAFLA_ROSTERS;
+      var rosterByTeam = STIGATAFLA_ROSTERS_DEFAULT;
       var mediaPlayer = StigataflaPlayerMedia.createPlayerMediaPlayer({
         overlay: document.getElementById("playerMediaOverlay"),
         video: document.getElementById("playerMediaVideo"),
@@ -1721,17 +1724,29 @@
         applyPresentationFromState();
       });
 
-      setInterval(maybeSwitchOvernightClock, 60000);
-      maybeSwitchOvernightClock();
+      function bootScoreboard() {
+        setInterval(maybeSwitchOvernightClock, 60000);
+        maybeSwitchOvernightClock();
 
-      applyPresentationFromState();
-      syncTournamentUi();
-      syncHomeTeamUi();
-      syncOpponentUi();
-      syncIntroOrdersFromTeams();
-      renderClock();
-      renderScores();
-      requestAnimationFrame(frame);
+        applyPresentationFromState();
+        syncTournamentUi();
+        syncHomeTeamUi();
+        syncOpponentUi();
+        syncIntroOrdersFromTeams();
+        renderClock();
+        renderScores();
+        requestAnimationFrame(frame);
+      }
+
+      StigataflaRosterLoader.load()
+        .then(function (data) {
+          var n = StigataflaRosterLoader.normalize(data);
+          if (n) rosterByTeam = n;
+        })
+        .catch(function () { /* nottast sjálfgefið */ })
+        .then(function () {
+          bootScoreboard();
+        });
     })();
   </script>
 </body>
