@@ -529,14 +529,26 @@
       if (!supabase) return;
       const err = $("loginErr");
       err.hidden = true;
-      const { error } = await supabase.auth.signInWithPassword({
-        email: $("email").value.trim(),
-        password: $("password").value,
-      });
-      if (error) {
-        err.textContent = error.message;
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: $("email").value.trim(),
+          password: $("password").value,
+        });
+        if (error) {
+          const m = String(error.message || error);
+          const net = /Failed to fetch|Load failed|NetworkError|ERR_NAME_NOT_RESOLVED|name not resolved/i.test(m);
+          err.textContent = net
+            ? "Gat ekki tengst Supabase (net/villa á slóð). Athugaðu netið, og að `supabaseUrl` í `admin/config.js` sé nákvæmlega Project URL frá Supabase (Settings → API) — röng eða ekki-til vísitala verkefnisins gefur t.d. ERR_NAME_NOT_RESOLVED."
+            : m;
+          err.hidden = false;
+        }
+      } catch (e) {
+        const msg = String(e && e.message ? e.message : e);
+        const net = /Failed to fetch|Load failed|NetworkError|ERR_NAME_NOT_RESOLVED/i.test(msg);
+        err.textContent = net
+          ? "Gat ekki tengst Supabase (net/villa á slóð). Athugaðu netið, og að `supabaseUrl` í `admin/config.js` sé nákvæmlega Project URL frá Supabase (Settings → API) — röng eða ekki-til vísitala verkefnisins gefur t.d. ERR_NAME_NOT_RESOLVED."
+          : msg;
         err.hidden = false;
-        return;
       }
     });
 
