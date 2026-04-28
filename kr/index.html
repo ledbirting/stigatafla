@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="is">
+<html lang="is" class="tk-larken">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Stigatafla — KR</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playwrite+NO:wght@100..400&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+  <link rel="preconnect" href="https://p.typekit.net" crossorigin />
+  <link rel="stylesheet" href="https://use.typekit.net/ydu2faa.css" />
   <style>
     :root {
+      --font-kr: "larken", sans-serif;
       --chrome-bg: #0a0a0c;
       --chrome-bg-elevated: #141416;
       --chrome-card: #1c1c1f;
@@ -35,7 +36,7 @@
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-kr);
       color: var(--chrome-text);
       background: var(--chrome-bg);
       -webkit-font-smoothing: antialiased;
@@ -111,9 +112,8 @@
       transition: opacity 3.5s cubic-bezier(0.33, 0, 0.2, 1);
     }
     .scoreboard__wallClock {
-      /* Google Fonts: “Playwrite Norge” is served as family name Playwrite NO */
-      font-family: "Playwrite NO", "Inter", system-ui, -apple-system, BlinkMacSystemFont, cursive;
-      font-weight: 300;
+      font-family: var(--font-kr);
+      font-weight: 700;
       font-size: 112px;
       line-height: 1;
       letter-spacing: 0;
@@ -178,7 +178,7 @@
     .scoreboard__score-num {
       flex: 1 1 0;
       min-width: 0;
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: var(--font-kr);
       font-weight: 900;
       font-size: 149.3333333333px;
       line-height: 1;
@@ -208,7 +208,7 @@
       padding: 0 16px;
       box-sizing: border-box;
       background: transparent;
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: var(--font-kr);
       font-weight: 800;
       font-size: 85.3333333333px;
       line-height: 1;
