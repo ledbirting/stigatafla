@@ -151,6 +151,8 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+      content-visibility: auto;
+      contain-intrinsic-size: auto 220px;
     }
     @media (max-width: 960px) {
       .player-card { grid-template-columns: 1fr 1fr; grid-auto-flow: dense; }
@@ -168,6 +170,9 @@
       color: var(--muted);
     }
     .media-block small a { font-size: 12px; word-break: break-all; }
+    .media-preview.is-loading-media {
+      opacity: 0.94;
+    }
     .media-preview {
       margin-top: 10px;
       border-radius: 10px;
@@ -522,12 +527,12 @@
       const foot = `<div class="media-preview__foot"><a href="${u}" target="_blank" rel="noopener">Opna tengil</a></div>`;
       if (k === "image" || k === "unknown") {
         return (
-          '<div class="media-preview" data-k="' +
+          '<div class="media-preview is-loading-media" data-k="' +
           escapeAttr(k) +
           '">' +
-          '<img class="media-preview__img js-media-thumb" src="' +
+          '<img class="media-preview__img js-media-thumb" data-src="' +
           u +
-          '" alt="" loading="lazy" decoding="async" />' +
+          '" alt="" decoding="async" />' +
           '<p class="media-preview__broken" hidden>Forskoðun tókst ekki — notaðu tengil fyrir neðan</p>' +
           foot +
           "</div>"
@@ -535,10 +540,10 @@
       }
       if (k === "video") {
         return (
-          '<div class="media-preview" data-k="video">' +
-          '<video class="media-preview__video js-media-video" src="' +
+          '<div class="media-preview is-loading-media" data-k="video">' +
+          '<video class="media-preview__video js-media-video" data-src="' +
           u +
-          '" controls muted playsinline preload="metadata"></video>' +
+          '" controls muted playsinline preload="none"></video>' +
           '<p class="media-preview__broken" hidden>Ekki tókst að spila hér — notaðu tengil fyrir neðan</p>' +
           foot +
           "</div>"
@@ -551,24 +556,73 @@
       );
     }
 
-    function wireMediaPreviews(root) {
-      root.querySelectorAll(".js-media-thumb").forEach((img) => {
-        if (img.dataset.wired) return;
-        img.dataset.wired = "1";
-        img.addEventListener("error", function () {
-          this.style.display = "none";
-          const p = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
-          if (p) p.hidden = false;
-        });
-      });
-      root.querySelectorAll(".js-media-video").forEach((vid) => {
-        if (vid.dataset.wired) return;
-        vid.dataset.wired = "1";
-        vid.addEventListener("error", function () {
-          this.style.display = "none";
-          const p = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
-          if (p) p.hidden = false;
-        });
+    let lazyMediaObserver;
+
+    function ensureLazyMediaObserver() {
+      if (lazyMediaObserver) return lazyMediaObserver;
+      lazyMediaObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const el = entry.target;
+            lazyMediaObserver.unobserve(el);
+            const ds = el.getAttribute("data-src");
+            if (!ds) continue;
+            el.removeAttribute("data-src");
+            delete el.dataset.lazyIo;
+            el.src = ds;
+            const wrap = el.closest(".media-preview");
+
+            if (el.tagName === "IMG") {
+              el.addEventListener(
+                "error",
+                function () {
+                  this.style.display = "none";
+                  const br = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
+                  if (br) br.hidden = false;
+                  if (wrap) wrap.classList.remove("is-loading-media");
+                },
+                { once: true }
+              );
+              el.addEventListener(
+                "load",
+                function () {
+                  if (wrap) wrap.classList.remove("is-loading-media");
+                },
+                { once: true }
+              );
+            } else if (el.tagName === "VIDEO") {
+              el.addEventListener(
+                "error",
+                function () {
+                  this.style.display = "none";
+                  const br = this.parentElement && this.parentElement.querySelector(".media-preview__broken");
+                  if (br) br.hidden = false;
+                  if (wrap) wrap.classList.remove("is-loading-media");
+                },
+                { once: true }
+              );
+              el.addEventListener(
+                "loadedmetadata",
+                function () {
+                  if (wrap) wrap.classList.remove("is-loading-media");
+                },
+                { once: true }
+              );
+            }
+          }
+        },
+        { root: null, rootMargin: "200px 0px", threshold: 0 }
+      );
+      return lazyMediaObserver;
+    }
+
+    function wireLazyMediaPreviews(root) {
+      const io = ensureLazyMediaObserver();
+      root.querySelectorAll(".js-media-thumb[data-src], .js-media-video[data-src]").forEach((el) => {
+        if (el.dataset.lazyIo) return;
+        el.dataset.lazyIo = "1";
+        io.observe(el);
       });
     }
 
@@ -576,6 +630,7 @@
       const list = currentList();
       const host = $("playerList");
       host.innerHTML = "";
+      const frag = document.createDocumentFragment();
       for (const p of list) {
         const idSafe = escapeAttr(p.id);
         const row = document.createElement("article");
@@ -614,8 +669,9 @@
             <button type="button" class="btn-danger" data-del="${idSafe}">Eyða leikmanni</button>
           </div>
         `;
-        host.appendChild(row);
+        frag.appendChild(row);
       }
+      host.appendChild(frag);
       host.querySelectorAll("input[type=text],input[type=number]").forEach((inp) => {
         inp.addEventListener("change", onFieldChange);
       });
@@ -631,7 +687,7 @@
       host.querySelectorAll("button[data-del]").forEach((b) => {
         b.addEventListener("click", onDeletePlayer);
       });
-      wireMediaPreviews(host);
+      wireLazyMediaPreviews(host);
     }
 
     function escapeAttr(s) {
