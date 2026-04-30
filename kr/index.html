@@ -377,6 +377,23 @@
     }
     select.controls__select:hover { border-color: rgba(255, 255, 255, 0.22); }
     select.controls__select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    textarea.controls__textarea {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.35;
+      border: 1px solid var(--chrome-border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--chrome-bg-elevated);
+      color: var(--chrome-text);
+      resize: vertical;
+      touch-action: manipulation;
+    }
+    textarea.controls__textarea:hover { border-color: rgba(255, 255, 255, 0.22); }
+    textarea.controls__textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .controls__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
     .controls__grid-cal { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
     button.controls__btn {
@@ -565,6 +582,59 @@
       background: rgba(255, 255, 255, 0.06);
       border-color: rgba(255, 255, 255, 0.12);
     }
+    .scoreboard__announce {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 36px;
+      box-sizing: border-box;
+      background-color: #060606;
+      background-image: url("https://media.zapp.is/storage/v1/object/public/zapp-web-assets/KR/Clock-BG.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, visibility 0.35s;
+    }
+    .scoreboard__announce--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    .scoreboard__announce-inner {
+      width: 92%;
+      height: 88%;
+      max-width: 92%;
+      max-height: 88%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scoreboard__announce-text {
+      margin: 0;
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+      text-align: center;
+      font-family: var(--font-kr);
+      font-weight: 700;
+      font-size: 90px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #f5f5f7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 40px rgba(0, 0, 0, 0.55);
+      user-select: none;
+    }
     .player-media-overlay {
       position: absolute;
       inset: 0;
@@ -589,6 +659,10 @@
       height: auto;
       object-fit: contain;
       display: none;
+    }
+    .controls__card--announce {
+      flex: 0 0 auto;
+      gap: 8px;
     }
     .controls__card--intro-launch {
       flex: 0 0 auto;
@@ -878,6 +952,11 @@
         <video id="playerMediaVideo" class="player-media-overlay__video" playsinline></video>
         <img id="playerMediaImg" class="player-media-overlay__img" alt="" />
       </div>
+      <div class="scoreboard__announce" id="announceLayer" aria-hidden="true">
+        <div class="scoreboard__announce-inner" id="announceInner">
+          <p class="scoreboard__announce-text" id="announceTextEl"></p>
+        </div>
+      </div>
     </div>
 
     <div class="broadcast-footer" role="toolbar" aria-label="Útsending">
@@ -947,6 +1026,27 @@
               <button type="button" class="controls__btn controls__btn--goal-minus" id="btnAwayMinus">−1 mark</button>
             </div>
           </div>
+        </section>
+
+        <section class="controls__card controls__card--announce" aria-labelledby="announce-heading">
+          <h2 id="announce-heading">Textatilkynning</h2>
+          <div class="controls__field">
+            <label class="controls__label" for="announceMessageInput">Skilaboð</label>
+            <textarea id="announceMessageInput" class="controls__textarea" rows="3" maxlength="800" placeholder="Skrifaðu skilaboð til að birtast á borðinu…"></textarea>
+          </div>
+          <div class="controls__field">
+            <label class="controls__label" for="announceDurationSelect">Lengd</label>
+            <select id="announceDurationSelect" class="controls__select">
+              <option value="5">5 sekúndur</option>
+              <option value="10">10 sekúndur</option>
+              <option value="15" selected>15 sekúndur</option>
+              <option value="20">20 sekúndur</option>
+              <option value="30">30 sekúndur</option>
+              <option value="45">45 sekúndur</option>
+              <option value="60">60 sekúndur</option>
+            </select>
+          </div>
+          <button type="button" class="controls__btn controls__btn--block controls__btn--resume" id="btnPlayAnnounce">Play message</button>
         </section>
 
         <section class="controls__card controls__card--intro-launch" aria-labelledby="intro-launch-heading">
@@ -1070,6 +1170,12 @@
       var goalPickerTitle = document.getElementById("goalPickerTitle");
       var goalPickerCancel = document.getElementById("goalPickerCancel");
       var goalPickerUnknown = document.getElementById("goalPickerUnknown");
+      var announceLayer = document.getElementById("announceLayer");
+      var announceInner = document.getElementById("announceInner");
+      var announceTextEl = document.getElementById("announceTextEl");
+      var announceMessageInput = document.getElementById("announceMessageInput");
+      var announceDurationSelect = document.getElementById("announceDurationSelect");
+      var btnPlayAnnounce = document.getElementById("btnPlayAnnounce");
 
       var rosterByTeam = STIGATAFLA_ROSTERS_DEFAULT;
       var mediaPlayer = StigataflaPlayerMedia.createPlayerMediaPlayer({
@@ -1084,6 +1190,52 @@
 
       var presentationMode = "clock";
       var wallClockLastKey = "";
+      var announceHideTimer = null;
+
+      function hideTextAnnouncement() {
+        if (announceHideTimer != null) {
+          clearTimeout(announceHideTimer);
+          announceHideTimer = null;
+        }
+        if (announceLayer) {
+          announceLayer.classList.remove("scoreboard__announce--visible");
+          announceLayer.setAttribute("aria-hidden", "true");
+        }
+      }
+
+      function fitAnnounceTypography() {
+        if (!announceTextEl || !announceInner) return;
+        announceTextEl.style.fontSize = "90px";
+        var minPx = 18;
+        var safety = 0;
+        while (safety < 80) {
+          safety += 1;
+          if (
+            announceTextEl.scrollHeight <= announceInner.clientHeight + 1 &&
+            announceTextEl.scrollWidth <= announceInner.clientWidth + 1
+          ) {
+            break;
+          }
+          var fs = parseFloat(window.getComputedStyle(announceTextEl).fontSize);
+          if (fs <= minPx) break;
+          announceTextEl.style.fontSize = fs - 2 + "px";
+        }
+      }
+
+      function showTextAnnouncement(text, durationSec) {
+        if (!announceLayer || !announceTextEl) return;
+        hideTextAnnouncement();
+        var msg = (text || "").trim();
+        if (!msg) return;
+        announceTextEl.textContent = msg;
+        announceLayer.classList.add("scoreboard__announce--visible");
+        announceLayer.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(function () {
+          requestAnimationFrame(fitAnnounceTypography);
+        });
+        var ms = Math.max(1, durationSec) * 1000;
+        announceHideTimer = setTimeout(hideTextAnnouncement, ms);
+      }
 
       function applyPresentationFromState() {
         scoreboardRoot.classList.remove("scoreboard--presentation-clock", "scoreboard--presentation-match");
@@ -1723,6 +1875,27 @@
         presentationMode = "clock";
         applyPresentationFromState();
       });
+
+      function syncAnnouncePlayEnabled() {
+        if (!btnPlayAnnounce || !announceMessageInput) return;
+        btnPlayAnnounce.disabled = !announceMessageInput.value.trim();
+      }
+
+      if (announceMessageInput) {
+        announceMessageInput.addEventListener("input", syncAnnouncePlayEnabled);
+      }
+      syncAnnouncePlayEnabled();
+
+      if (btnPlayAnnounce) {
+        btnPlayAnnounce.addEventListener("click", function () {
+          if (!announceMessageInput || !announceDurationSelect) return;
+          var raw = announceMessageInput.value.trim();
+          if (!raw) return;
+          var sec = parseInt(announceDurationSelect.value, 10);
+          if (!(sec > 0)) sec = 15;
+          showTextAnnouncement(raw, sec);
+        });
+      }
 
       function bootScoreboard() {
         setInterval(maybeSwitchOvernightClock, 60000);
