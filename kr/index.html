@@ -224,11 +224,13 @@
       flex: 1;
       min-width: 0;
       min-height: 0;
-      padding: 14px 16px 16px;
+      padding: 10px 12px 12px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       background: linear-gradient(180deg, var(--chrome-bg) 0%, #070708 100%);
+      container-type: inline-size;
+      container-name: stig-controls;
     }
     .controls {
       flex: 1;
@@ -239,8 +241,8 @@
       overflow: hidden;
     }
     .controls__title {
-      margin: 0 0 8px;
-      font-size: 20px;
+      margin: 0 0 6px;
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--chrome-text);
@@ -253,8 +255,10 @@
       flex-direction: column;
       flex-wrap: nowrap;
       align-items: stretch;
-      gap: 10px;
-      overflow: hidden;
+      gap: 8px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .controls__card {
       flex: 0 0 auto;
@@ -263,7 +267,7 @@
       background: var(--chrome-card);
       border: 1px solid var(--chrome-border);
       border-radius: var(--radius);
-      padding: 12px 12px 14px;
+      padding: 9px 10px 10px;
       margin-bottom: 0;
       box-shadow: var(--shadow-card);
       overflow-x: hidden;
@@ -276,11 +280,27 @@
     .controls__card--match,
     .controls__card--clock,
     .controls__card--goals {
-      gap: 8px;
+      gap: 6px;
     }
     .controls__card--clock {
-      flex: 1;
+      flex: 0 0 auto;
       min-height: 0;
+    }
+    @container stig-controls (min-width: 520px) {
+      .controls__card--match {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        column-gap: 10px;
+        row-gap: 0;
+        align-items: end;
+      }
+      .controls__card--match > h2 {
+        grid-column: 1 / -1;
+        margin-bottom: 4px;
+      }
+      .controls__card--match > .controls__field .controls__label {
+        margin-bottom: 2px;
+      }
     }
     .controls__field {
       flex: 0 0 auto;
@@ -293,54 +313,58 @@
     }
     .controls__card--match .controls__field .controls__select {
       flex: none;
-      min-height: 48px;
-      font-size: 22px;
+      min-height: 34px;
+      font-size: 14px;
       font-weight: 600;
-      padding: 10px 36px 10px 12px;
+      padding: 5px 28px 5px 8px;
+    }
+    .controls__card--match .controls__label {
+      font-size: 10px;
+      letter-spacing: 0.09em;
+      margin-bottom: 3px;
     }
     .controls__clock-body {
-      flex: 1;
+      flex: 0 0 auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
     }
     .controls__grid2--fill {
-      flex: 1;
-      min-height: 0;
+      flex: 0 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr;
-      gap: 10px;
+      grid-template-rows: auto;
+      gap: 6px;
     }
     .controls__grid2--fill .controls__btn {
-      min-height: 0;
-      height: 100%;
+      min-height: 38px;
+      height: auto;
       align-self: stretch;
-      font-size: clamp(17px, 2vw, 28px);
-      font-weight: 700;
-      padding: 12px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 8px;
+      line-height: 1.2;
     }
     .controls__grid-cal--fill {
-      flex: 1.15;
-      min-height: 0;
+      flex: 0 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 8px;
+      grid-template-rows: auto auto;
+      gap: 5px;
     }
     .controls h2 {
       margin: 0 0 4px;
-      font-size: 18px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       color: var(--chrome-muted);
       text-transform: uppercase;
       flex-shrink: 0;
     }
     .controls__subhead {
       margin: 0;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -350,18 +374,18 @@
     .controls__divider { height: 1px; background: var(--chrome-border); margin: 0; border: 0; flex-shrink: 0; }
     .controls label.controls__label {
       display: block;
-      font-size: 20px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--chrome-muted);
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
     select.controls__select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 6px 10px;
       font-family: inherit;
-      font-size: 22px;
+      font-size: 14px;
       font-weight: 500;
       border: 1px solid var(--chrome-border-strong);
       border-radius: var(--radius-sm);
@@ -372,17 +396,44 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2398989d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
-      padding-right: 32px;
+      padding-right: 28px;
       touch-action: manipulation;
     }
     select.controls__select:hover { border-color: rgba(255, 255, 255, 0.22); }
     select.controls__select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .controls__announce-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .controls__announce-row .controls__btn--announce-play {
+      width: 100%;
+    }
+    @container stig-controls (min-width: 400px) {
+      .controls__announce-row {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 8px;
+      }
+      .controls__announce-row .controls__field--grow {
+        flex: 1;
+        min-width: 0;
+      }
+      .controls__btn--announce-play {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 118px;
+      }
+      .controls__announce-row .controls__btn--announce-play {
+        width: auto;
+      }
+    }
     textarea.controls__textarea {
       width: 100%;
-      min-height: 72px;
-      padding: 10px 12px;
+      min-height: 48px;
+      padding: 6px 10px;
       font-family: inherit;
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 500;
       line-height: 1.35;
       border: 1px solid var(--chrome-border-strong);
@@ -398,10 +449,10 @@
     .controls__grid-cal { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
     button.controls__btn {
       font-family: inherit;
-      font-size: 20px;
+      font-size: 14px;
       font-weight: 600;
-      padding: 8px 10px;
-      min-height: 40px;
+      padding: 6px 10px;
+      min-height: 34px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--chrome-border-strong);
       background: var(--chrome-bg-elevated);
@@ -420,10 +471,13 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      min-height: 48px;
+      min-height: 36px;
       text-align: center;
       line-height: 1.15;
-      padding: 10px 10px;
+      padding: 7px 10px;
+    }
+    .controls__btn--announce-play {
+      white-space: nowrap;
     }
     button.controls__btn--go {
       background: rgba(50, 215, 75, 0.14);
@@ -454,34 +508,34 @@
     }
     button.controls__btn--cal { min-height: 36px; font-size: 11px; padding: 6px 8px; }
     .controls__grid-cal--fill button.controls__btn--cal {
-      min-height: 0;
-      height: 100%;
+      min-height: 32px;
+      height: auto;
       align-self: stretch;
-      font-size: clamp(14px, 1.65vw, 22px);
-      font-weight: 700;
-      padding: 10px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 6px;
     }
     button.controls__btn--goal-plus {
-      min-height: 52px;
-      font-size: 22px;
+      min-height: 36px;
+      font-size: 14px;
       font-weight: 700;
       background: rgba(50, 215, 75, 0.12);
       border-color: rgba(50, 215, 75, 0.35);
       color: #5be27a;
-      padding: 12px 10px;
+      padding: 7px 8px;
     }
     button.controls__btn--goal-plus:hover {
       background: rgba(50, 215, 75, 0.2);
       border-color: rgba(50, 215, 75, 0.5);
     }
     button.controls__btn--goal-minus {
-      min-height: 44px;
-      font-size: 18px;
+      min-height: 32px;
+      font-size: 13px;
       font-weight: 600;
       color: #ff8a83;
       border-color: rgba(255, 69, 58, 0.28);
       background: rgba(255, 69, 58, 0.08);
-      padding: 10px 10px;
+      padding: 6px 8px;
     }
     button.controls__btn--goal-minus:hover {
       background: rgba(255, 69, 58, 0.15);
@@ -492,25 +546,28 @@
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
-      gap: 10px;
+      gap: 8px;
       align-items: stretch;
     }
     .controls__goal-box {
       flex: 1;
       min-width: 0;
-      padding: 10px;
+      padding: 6px 8px;
       border-radius: var(--radius-sm);
       background: var(--chrome-bg-elevated);
       border: 1px solid var(--chrome-border);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 5px 6px;
+      align-items: center;
     }
     .controls__goal-tag {
+      grid-column: 1 / -1;
       flex-shrink: 0;
-      font-size: 16px;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--chrome-hint);
       margin: 0;
@@ -662,14 +719,14 @@
     }
     .controls__card--announce {
       flex: 0 0 auto;
-      gap: 8px;
+      gap: 6px;
     }
     .controls__card--intro-launch {
       flex: 0 0 auto;
     }
     .controls__intro-launch-hint {
-      margin: 0 0 8px;
-      font-size: 13px;
+      margin: 0 0 6px;
+      font-size: 11px;
       color: var(--chrome-hint);
       line-height: 1.35;
     }
@@ -1032,21 +1089,23 @@
           <h2 id="announce-heading">Textatilkynning</h2>
           <div class="controls__field">
             <label class="controls__label" for="announceMessageInput">Skilaboð</label>
-            <textarea id="announceMessageInput" class="controls__textarea" rows="3" maxlength="800" placeholder="Skrifaðu skilaboð til að birtast á borðinu…"></textarea>
+            <textarea id="announceMessageInput" class="controls__textarea" rows="2" maxlength="800" placeholder="Skrifaðu skilaboð til að birtast á borðinu…"></textarea>
           </div>
-          <div class="controls__field">
-            <label class="controls__label" for="announceDurationSelect">Lengd</label>
-            <select id="announceDurationSelect" class="controls__select">
-              <option value="5">5 sekúndur</option>
-              <option value="10">10 sekúndur</option>
-              <option value="15" selected>15 sekúndur</option>
-              <option value="20">20 sekúndur</option>
-              <option value="30">30 sekúndur</option>
-              <option value="45">45 sekúndur</option>
-              <option value="60">60 sekúndur</option>
-            </select>
+          <div class="controls__announce-row">
+            <div class="controls__field controls__field--grow">
+              <label class="controls__label" for="announceDurationSelect">Lengd</label>
+              <select id="announceDurationSelect" class="controls__select">
+                <option value="5">5 sekúndur</option>
+                <option value="10">10 sekúndur</option>
+                <option value="15" selected>15 sekúndur</option>
+                <option value="20">20 sekúndur</option>
+                <option value="30">30 sekúndur</option>
+                <option value="45">45 sekúndur</option>
+                <option value="60">60 sekúndur</option>
+              </select>
+            </div>
+            <button type="button" class="controls__btn controls__btn--resume controls__btn--announce-play" id="btnPlayAnnounce">Play message</button>
           </div>
-          <button type="button" class="controls__btn controls__btn--block controls__btn--resume" id="btnPlayAnnounce">Play message</button>
         </section>
 
         <section class="controls__card controls__card--intro-launch" aria-labelledby="intro-launch-heading">
