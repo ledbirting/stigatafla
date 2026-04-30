@@ -724,6 +724,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease;
@@ -740,6 +741,7 @@
       height: auto;
       object-fit: contain;
       display: none;
+      backface-visibility: hidden;
     }
     .controls__card--announce {
       flex: 0 0 auto;
@@ -1289,6 +1291,7 @@
         video: document.getElementById("playerMediaVideo"),
         img: document.getElementById("playerMediaImg"),
         skipBtn: null,
+        introSlideTransitionMs: 700,
       });
       var goalPickerSide = null;
 

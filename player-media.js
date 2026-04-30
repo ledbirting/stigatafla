@@ -18,13 +18,23 @@
     var video = opts.video;
     var img = opts.img;
     var skipBtn = opts.skipBtn;
+    /** Slide transition between intro slides (ms total ≈ exit + enter); 0 disables. Keflavík uses 700. */
+    var introSlideTransitionMs = Math.max(0, Number(opts.introSlideTransitionMs) || 0);
     var gen = 0;
     var introControllable = null;
 
     video.setAttribute("playsinline", "");
     video.playsInline = true;
 
+    function stripMediaTransforms() {
+      video.style.transition = "";
+      video.style.transform = "";
+      img.style.transition = "";
+      img.style.transform = "";
+    }
+
     function hideMedia() {
+      stripMediaTransforms();
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -33,6 +43,145 @@
       img.removeAttribute("src");
       img.style.display = "none";
       video.style.display = "none";
+    }
+
+    function visibleOutgoingEl() {
+      if (!overlay.classList.contains("player-media-overlay--visible")) return null;
+      if (video.style.display === "block" && (video.src || video.currentSrc)) return video;
+      if (img.style.display === "block" && img.src) return img;
+      return null;
+    }
+
+    function playImageWithSlideEnter(url, durationMs, onDone, myGen, fromRight, halfMs, easing) {
+      video.style.display = "none";
+      img.style.display = "block";
+      img.style.transition = "none";
+      img.style.transform = "translateX(" + (fromRight ? "100%" : "-100%") + ")";
+      var enterDoneTimer = null;
+      var displayTimer = null;
+      var enterStarted = false;
+      function beginEnterFromLoad() {
+        if (enterStarted) return;
+        enterStarted = true;
+        img.onload = null;
+        if (myGen !== gen) return;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            if (myGen !== gen) return;
+            img.style.transition = "transform " + halfMs + "ms " + easing;
+            img.style.transform = "translateX(0)";
+          });
+        });
+        enterDoneTimer = setTimeout(function () {
+          if (myGen !== gen) return;
+          stripMediaTransforms();
+          displayTimer = setTimeout(function () {
+            if (myGen !== gen) return;
+            onDone();
+          }, durationMs);
+        }, halfMs);
+      }
+      img.onload = beginEnterFromLoad;
+      img.onerror = function () {
+        img.onerror = null;
+        if (enterDoneTimer) clearTimeout(enterDoneTimer);
+        if (displayTimer) clearTimeout(displayTimer);
+        if (myGen !== gen) return;
+        onDone();
+      };
+      img.src = url;
+      if (img.complete && img.naturalWidth > 0) {
+        beginEnterFromLoad();
+      }
+    }
+
+    function playVideoWithSlideEnter(url, onDone, myGen, fromRight, halfMs, easing) {
+      img.style.display = "none";
+      video.style.display = "block";
+      video.style.transition = "none";
+      video.style.transform = "translateX(" + (fromRight ? "100%" : "-100%") + ")";
+      video.muted = false;
+      var enterAnimStarted = false;
+
+      function startEnterAnimOnce() {
+        if (enterAnimStarted) return;
+        enterAnimStarted = true;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            if (myGen !== gen) return;
+            video.style.transition = "transform " + halfMs + "ms " + easing;
+            video.style.transform = "translateX(0)";
+          });
+        });
+      }
+
+      video.onended = function () {
+        video.onended = null;
+        if (myGen !== gen) return;
+        onDone();
+      };
+      video.onerror = function () {
+        video.onerror = null;
+        if (myGen !== gen) return;
+        onDone();
+      };
+
+      function onLoadedData() {
+        video.removeEventListener("loadeddata", onLoadedData);
+        startEnterAnimOnce();
+      }
+      video.addEventListener("loadeddata", onLoadedData);
+
+      video.src = url;
+      if (video.readyState >= 2) {
+        onLoadedData();
+      }
+      var attempt = video.play();
+      if (attempt && typeof attempt.catch === "function") {
+        attempt.catch(function () {
+          if (myGen !== gen) return;
+          video.muted = true;
+          var p2 = video.play();
+          if (p2 && p2.catch) {
+            p2.catch(function () {
+              if (myGen !== gen) return;
+              onDone();
+            });
+          }
+        });
+      }
+    }
+
+    function runIntroSlideTransition(incomingUrl, direction, imageDurationMs, onDone, myGen) {
+      var half = introSlideTransitionMs / 2;
+      var easing = "cubic-bezier(0.33, 0, 0.2, 1)";
+      var outEl = visibleOutgoingEl();
+      if (!outEl) {
+        playOne(incomingUrl, imageDurationMs, onDone, myGen);
+        return;
+      }
+      outEl.style.transition = "transform " + half + "ms " + easing;
+      outEl.style.transform = direction > 0 ? "translateX(-100%)" : "translateX(100%)";
+      setTimeout(function () {
+        if (myGen !== gen) return;
+        stripMediaTransforms();
+        hideMedia();
+        var fromRight = direction > 0;
+        showOverlay();
+        if (mediaKindFromUrl(incomingUrl) === "image") {
+          playImageWithSlideEnter(
+            incomingUrl,
+            imageDurationMs,
+            onDone,
+            myGen,
+            fromRight,
+            half,
+            easing
+          );
+        } else {
+          playVideoWithSlideEnter(incomingUrl, onDone, myGen, fromRight, half, easing);
+        }
+      }, half);
     }
 
     function hideOverlay() {
@@ -134,7 +283,8 @@
       }
     }
 
-    function playCurrentIntroSlide() {
+    function playCurrentIntroSlide(slideDirection) {
+      if (slideDirection == null) slideDirection = 1;
       var s = introControllable;
       if (!s) return;
       if (s.i >= s.urls.length) {
@@ -148,12 +298,18 @@
       callIntroSlideChange(s, false);
       var myGen = gen;
       var url = s.urls[s.i];
-      playOne(url, INTRO_IMAGE_MS, function () {
+      function onIntroSlideFinished() {
         if (myGen !== gen) return;
         if (!introControllable || introControllable !== s) return;
         s.i += 1;
-        playCurrentIntroSlide();
-      });
+        playCurrentIntroSlide(1);
+      }
+      var useSlide = introSlideTransitionMs > 0 && visibleOutgoingEl();
+      if (useSlide) {
+        runIntroSlideTransition(url, slideDirection, INTRO_IMAGE_MS, onIntroSlideFinished, myGen);
+        return;
+      }
+      playOne(url, INTRO_IMAGE_MS, onIntroSlideFinished);
     }
 
     function startControllableIntro(urls, onComplete, onSlideChange) {
@@ -176,7 +332,9 @@
       var s = introControllable;
       if (!s) return;
       gen += 1;
-      hideMedia();
+      if (introSlideTransitionMs <= 0) {
+        hideMedia();
+      }
       if (s.i < s.urls.length) {
         s.i += 1;
       }
@@ -188,7 +346,7 @@
         if (oc) oc();
         return;
       }
-      playCurrentIntroSlide();
+      playCurrentIntroSlide(1);
     }
 
     function introGoPrev() {
@@ -196,9 +354,11 @@
       if (!s) return;
       if (s.i <= 0) return;
       gen += 1;
-      hideMedia();
+      if (introSlideTransitionMs <= 0) {
+        hideMedia();
+      }
       s.i -= 1;
-      playCurrentIntroSlide();
+      playCurrentIntroSlide(-1);
     }
 
     function introGetSlideState() {
