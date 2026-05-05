@@ -794,16 +794,11 @@
     }
     .intro-panel__grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 12px;
       padding: 12px 16px 16px;
       overflow: auto;
       min-height: 0;
-    }
-    @media (max-width: 720px) {
-      .intro-panel__grid {
-        grid-template-columns: 1fr;
-      }
     }
     .intro-panel__col {
       display: flex;
@@ -1112,7 +1107,6 @@
           <h2 id="intro-launch-heading">Kynningar</h2>
           <p class="controls__intro-launch-hint">Haka við hver á leikjaplatta (liðslista), raða með drætti, og stjórna kynningu undir.</p>
           <button type="button" class="controls__btn controls__btn--block" id="btnOpenIntroPanel">Opna kynningaglugga</button>
-          <p class="controls__subhead" style="margin-top:8px"><a href="../admin/index.html" style="color:var(--chrome-hint);font-size:14px">Leikmennastillingar (innskráning)</a></p>
         </section>
         </div>
       </div>
@@ -1136,12 +1130,7 @@
         <div class="intro-panel__col">
           <p class="intro-panel__sub" id="introSubHome">Heimalið</p>
           <ul id="introListHome" class="intro-order-list" aria-label="Kynningaröð heimaliðs"></ul>
-          <button type="button" class="controls__btn controls__btn--block" id="btnIntroHome">Spila kynningu (heima)</button>
-        </div>
-        <div class="intro-panel__col">
-          <p class="intro-panel__sub" id="introSubAway">Útilið</p>
-          <ul id="introListAway" class="intro-order-list" aria-label="Kynningaröð útiliðs"></ul>
-          <button type="button" class="controls__btn controls__btn--block" id="btnIntroAway">Spila kynningu (úti)</button>
+          <button type="button" class="controls__btn controls__btn--block" id="btnIntroHome">Spila kynningu</button>
         </div>
       </div>
     </div>
@@ -1215,16 +1204,13 @@
       var btnOpenIntroPanel = document.getElementById("btnOpenIntroPanel");
       var btnCloseIntroPanel = document.getElementById("btnCloseIntroPanel");
       var introListHome = document.getElementById("introListHome");
-      var introListAway = document.getElementById("introListAway");
       var introSubHome = document.getElementById("introSubHome");
-      var introSubAway = document.getElementById("introSubAway");
       var introPlayerControls = document.getElementById("introPlayerControls");
       var introSlideLabel = document.getElementById("introSlideLabel");
       var btnIntroPrev = document.getElementById("btnIntroPrev");
       var btnIntroNext = document.getElementById("btnIntroNext");
       var btnStopIntro = document.getElementById("btnStopIntro");
       var btnIntroHome = document.getElementById("btnIntroHome");
-      var btnIntroAway = document.getElementById("btnIntroAway");
       var goalPickerBackdrop = document.getElementById("goalPickerBackdrop");
       var goalPickerList = document.getElementById("goalPickerList");
       var goalPickerTitle = document.getElementById("goalPickerTitle");
@@ -1432,9 +1418,7 @@
       }
 
       var introOrderHome = [];
-      var introOrderAway = [];
       var introSheetHome = {};
-      var introSheetAway = {};
 
       function mergeSheetWithRoster(prev, teamId) {
         var roster = getRoster(teamId);
@@ -1486,9 +1470,7 @@
 
       function syncIntroOrdersFromTeams() {
         introOrderHome = mergeOrderWithRoster(introOrderHome, homeTeamSelect.value);
-        introOrderAway = mergeOrderWithRoster(introOrderAway, opponentSelect.value);
         introSheetHome = mergeSheetWithRoster(introSheetHome, homeTeamSelect.value);
-        introSheetAway = mergeSheetWithRoster(introSheetAway, opponentSelect.value);
         if (introPanelBackdrop && !introPanelBackdrop.hidden) {
           renderIntroPanelLists();
         }
@@ -1500,26 +1482,24 @@
         return "#" + p.number + " " + p.name;
       }
 
-      function readSheetFromList(ul, side) {
+      function readSheetFromList(ul) {
         var ch = ul.querySelectorAll(".intro-order-item__check");
         for (var c = 0; c < ch.length; c++) {
           var pid = ch[c].getAttribute("data-id");
           if (!pid) continue;
-          if (side === "home") introSheetHome[pid] = ch[c].checked;
-          else introSheetAway[pid] = ch[c].checked;
+          introSheetHome[pid] = ch[c].checked;
         }
       }
 
-      function syncOrderFromListEl(ul, side) {
+      function syncOrderFromListEl(ul) {
         var items = ul.querySelectorAll(".intro-order-item");
         var ids = [];
         for (var i = 0; i < items.length; i++) {
           var id = items[i].getAttribute("data-id");
           if (id) ids.push(id);
         }
-        if (side === "home") introOrderHome = ids;
-        else introOrderAway = ids;
-        readSheetFromList(ul, side);
+        introOrderHome = ids;
+        readSheetFromList(ul);
       }
 
       function getDragAfterElement(ul, y) {
@@ -1535,7 +1515,7 @@
         return closest.el;
       }
 
-      function bindIntroListDnD(ul, side) {
+      function bindIntroListDnD(ul) {
         ul.addEventListener("dragstart", function (e) {
           var t = e.target;
           if (t.nodeType !== 1) return;
@@ -1545,7 +1525,7 @@
         ul.addEventListener("dragend", function (e) {
           var t = e.target;
           if (t.nodeType === 1) t.classList.remove("intro-order-item--dragging");
-          syncOrderFromListEl(ul, side);
+          syncOrderFromListEl(ul);
         });
         ul.addEventListener("dragover", function (e) {
           e.preventDefault();
@@ -1557,10 +1537,10 @@
         });
       }
 
-      function renderIntroList(ul, orderIds, teamId, side) {
+      function renderIntroList(ul, orderIds, teamId) {
         ul.innerHTML = "";
         var byId = rosterByIdMap(teamId);
-        var sheet = side === "home" ? introSheetHome : introSheetAway;
+        var sheet = introSheetHome;
         if (!orderIds.length) {
           var empty = document.createElement("li");
           empty.className = "intro-order-empty";
@@ -1581,12 +1561,11 @@
           cb.className = "intro-order-item__check";
           cb.setAttribute("data-id", p.id);
           cb.checked = !!sheet[p.id];
-          (function (pid, sd) {
+          (function (pid) {
             cb.addEventListener("change", function () {
-              if (sd === "home") introSheetHome[pid] = this.checked;
-              else introSheetAway[pid] = this.checked;
+              introSheetHome[pid] = this.checked;
             });
-          })(p.id, side);
+          })(p.id);
           li.appendChild(cb);
           var grip = document.createElement("span");
           grip.className = "intro-order-item__grip";
@@ -1603,17 +1582,13 @@
 
       function renderIntroPanelLists() {
         introSubHome.textContent = "Heimalið — " + (homeTeamSelect.options[homeTeamSelect.selectedIndex] || "").text;
-        introSubAway.textContent = "Útilið — " + (opponentSelect.options[opponentSelect.selectedIndex] || "").text;
-        renderIntroList(introListHome, introOrderHome, homeTeamSelect.value, "home");
-        renderIntroList(introListAway, introOrderAway, opponentSelect.value, "away");
+        renderIntroList(introListHome, introOrderHome, homeTeamSelect.value);
       }
 
       function openIntroPanel() {
         if (!goalPickerBackdrop.hidden) closeGoalPicker();
         introOrderHome = mergeOrderWithRoster(introOrderHome, homeTeamSelect.value);
-        introOrderAway = mergeOrderWithRoster(introOrderAway, opponentSelect.value);
         introSheetHome = mergeSheetWithRoster(introSheetHome, homeTeamSelect.value);
-        introSheetAway = mergeSheetWithRoster(introSheetAway, opponentSelect.value);
         introPanelBackdrop.hidden = false;
         renderIntroPanelLists();
         btnCloseIntroPanel.focus();
@@ -1625,18 +1600,16 @@
         introPanelBackdrop.hidden = true;
       }
 
-      function hasAnyCheckedOnSheet(side) {
-        var order = side === "home" ? introOrderHome : introOrderAway;
-        var sheet = side === "home" ? introSheetHome : introSheetAway;
-        for (var i = 0; i < order.length; i++) {
-          if (sheet[order[i]]) return true;
+      function hasAnyCheckedOnSheet() {
+        for (var i = 0; i < introOrderHome.length; i++) {
+          if (introSheetHome[introOrderHome[i]]) return true;
         }
         return false;
       }
 
-      function introUrlsFromOrder(teamId, side) {
-        var order = side === "home" ? introOrderHome : introOrderAway;
-        var sheet = side === "home" ? introSheetHome : introSheetAway;
+      function introUrlsFromOrder(teamId) {
+        var order = introOrderHome;
+        var sheet = introSheetHome;
         var byId = rosterByIdMap(teamId);
         var urls = [];
         for (var i = 0; i < order.length; i++) {
@@ -1658,8 +1631,7 @@
         btnStopIntro.disabled = false;
       }
 
-      bindIntroListDnD(introListHome, "home");
-      bindIntroListDnD(introListAway, "away");
+      bindIntroListDnD(introListHome);
 
       btnOpenIntroPanel.addEventListener("click", openIntroPanel);
       btnCloseIntroPanel.addEventListener("click", closeIntroPanel);
@@ -1730,7 +1702,6 @@
             break;
           }
         }
-        syncIntroOrdersFromTeams();
       });
 
       function afterIntroEnd() {
@@ -1738,26 +1709,9 @@
       }
 
       btnIntroHome.addEventListener("click", function () {
-        var urls = introUrlsFromOrder(homeTeamSelect.value, "home");
+        var urls = introUrlsFromOrder(homeTeamSelect.value);
         if (!urls.length) {
-          if (!hasAnyCheckedOnSheet("home")) {
-            window.alert("Haka við leikmenn (eða annað starfsfólk) sem á leikjaplötu áður en kynningu er hrint af stað.");
-          } else {
-            window.alert("Engar nothæfar kynningar (myndir/myndbönd) í þessu vali. Athugaðu miðlakerfi.");
-          }
-          return;
-        }
-        mediaPlayer.playIntroSequence(
-          urls,
-          afterIntroEnd,
-          onIntroSlideChange
-        );
-      });
-
-      btnIntroAway.addEventListener("click", function () {
-        var urls = introUrlsFromOrder(opponentSelect.value, "away");
-        if (!urls.length) {
-          if (!hasAnyCheckedOnSheet("away")) {
+          if (!hasAnyCheckedOnSheet()) {
             window.alert("Haka við leikmenn (eða annað starfsfólk) sem á leikjaplötu áður en kynningu er hrint af stað.");
           } else {
             window.alert("Engar nothæfar kynningar (myndir/myndbönd) í þessu vali. Athugaðu miðlakerfi.");
