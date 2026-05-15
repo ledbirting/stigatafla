@@ -1221,6 +1221,19 @@
       /** Safety cap for manual time adjustment only; match clock may run past 45/90/105/120:00. */
       var MAX_CLOCK_SEC = 24 * 3600;
 
+      /** Full-screen „MARK“ graphic before scorer celebration when KR scores. */
+      var KR_HOME_GOAL_MARK_URL =
+        "https://media.zapp.is/storage/v1/object/public/stigatafla/kr/KR-Mark.jpg";
+      var KR_HOME_GOAL_MARK_DURATION_MS = 10000;
+
+      function teamIdForGoalSide(side) {
+        return side === "home" ? homeTeamSelect.value : opponentSelect.value;
+      }
+
+      function isKrScoringGoalSide(side) {
+        return teamIdForGoalSide(side) === "kr";
+      }
+
       var matchSeconds = 0;
       var half = 1;
       var running = false;
@@ -1780,6 +1793,14 @@
         goalPickerSide = null;
       }
 
+      /** 10s KR-Mark splash, then optional player goal graphic (still uses goal player-media timing). */
+      function playKrHomeGoalMarkThenScorer(goalUrl) {
+        var nextUrl = goalUrl && String(goalUrl).trim() ? String(goalUrl).trim() : "";
+        mediaPlayer.playOverlayOnce(KR_HOME_GOAL_MARK_URL, KR_HOME_GOAL_MARK_DURATION_MS, function () {
+          if (nextUrl) mediaPlayer.playGoalGraphic(nextUrl);
+        });
+      }
+
       function openGoalPicker(side) {
         mediaPlayer.cancel();
         introPlayerControls.hidden = true;
@@ -1794,6 +1815,7 @@
             awayScore += 1;
             renderScores();
           }
+          if (isKrScoringGoalSide(side)) playKrHomeGoalMarkThenScorer("");
           return;
         }
         goalPickerSide = side;
@@ -1814,7 +1836,9 @@
                 awayScore += 1;
                 renderScores();
               }
-              if (pl.goalUrl) {
+              if (isKrScoringGoalSide(side)) {
+                playKrHomeGoalMarkThenScorer(pl.goalUrl || "");
+              } else if (pl.goalUrl) {
                 mediaPlayer.playGoalGraphic(pl.goalUrl);
               }
             });
@@ -1900,6 +1924,7 @@
           awayScore += 1;
           renderScores();
         }
+        if (isKrScoringGoalSide(side)) playKrHomeGoalMarkThenScorer("");
       });
 
       goalPickerBackdrop.addEventListener("click", function (e) {
