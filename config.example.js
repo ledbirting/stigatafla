@@ -11,4 +11,6 @@
  */
 window.STIGATAFLA_CONFIG = {
   rostersUrl: "",
+  /** Optional — KR scoreboard “splash” library (JSON in public Storage). */
+  splashKrUrl: "",
 };

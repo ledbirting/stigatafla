@@ -276,6 +276,21 @@
       next();
     }
 
+    /**
+     * Single full-bleed overlay: still images use imageDurationMs; videos run until ended (duration ignored).
+     * Invalidates any in-flight slide timers from a previous run.
+     */
+    function playOverlayOnce(url, imageDurationMs, onComplete) {
+      if (!url) {
+        if (onComplete) onComplete();
+        return;
+      }
+      gen += 1;
+      introControllable = null;
+      var ms = Math.max(1000, Number(imageDurationMs) || GOAL_IMAGE_MS);
+      playSequence([url], ms, onComplete);
+    }
+
     function callIntroSlideChange(s, isEnded) {
       if (s && s.onSlideChange) {
         if (isEnded) s.onSlideChange(-1, s.urls ? s.urls.length : 0, true);
@@ -392,6 +407,7 @@
         }
         playSequence([url], GOAL_IMAGE_MS, onComplete);
       },
+      playOverlayOnce: playOverlayOnce,
       playIntroSequence: function (urls, onComplete, onSlideChange) {
         startControllableIntro(urls, onComplete, onSlideChange);
       },

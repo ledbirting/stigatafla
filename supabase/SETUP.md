@@ -19,6 +19,8 @@
 1. Create a bucket (e.g. `stigatafla`). The default paths in `admin/config.example.js` are:
    - `stigatafla/rosters.json` — full roster JSON.
    - `stigatafla/media/{teamId}/{playerId}-intro|goal.ext` — graphics.
+   - `stigatafla/splash-kr.json` — KR scoreboard splash library (list of image/video URLs).
+   - `stigatafla/media/kr/splash/` — files for that library.
 
 2. **Public read** (simplest for scoreboard + on-air graphics):  
    Bucket → make public, or add a **SELECT** policy for `public` on `storage.objects` for that bucket.
@@ -27,7 +29,7 @@
 
    Exact policy syntax depends on your Supabase version; use the policy templates under **Storage** in the dashboard.
 
-4. After the first **Save** from the admin app, copy the **public URL** of `rosters.json` into `stigatafla.config.js` as `rostersUrl` for KR/Keflavík boards to load it.
+4. After the first **Save** from the admin app, copy the **public URL** of `rosters.json` into `stigatafla.config.js` as `rostersUrl` for KR/Keflavík boards. For KR full-board splashes, set `splashKrUrl` to the public URL of `splash-kr.json` (same public bucket pattern).
 
 ## JSON shape
 

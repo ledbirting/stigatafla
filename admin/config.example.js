@@ -18,4 +18,6 @@ window.STIGATAFLA_ADMIN_CONFIG = {
   bucket: "stigatafla",
   rostersPath: "stigatafla/rosters.json",
   mediaPathPrefix: "stigatafla/media",
+  splashKrPath: "stigatafla/splash-kr.json",
+  splashKrMediaPrefix: "stigatafla/media/kr/splash",
 };

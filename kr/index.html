@@ -721,6 +721,23 @@
       flex: 0 0 auto;
       gap: 6px;
     }
+    .controls__card--splash {
+      flex: 0 0 auto;
+      gap: 6px;
+    }
+    .controls__splash-hint {
+      margin: 0 0 4px;
+      font-size: 11px;
+      color: var(--chrome-hint);
+      line-height: 1.35;
+    }
+    .controls__splash-video-note {
+      margin: 4px 0 0;
+      font-size: 11px;
+      font-weight: 500;
+      color: #7eb6ff;
+      line-height: 1.35;
+    }
     .controls__card--intro-launch {
       flex: 0 0 auto;
     }
@@ -1103,6 +1120,31 @@
           </div>
         </section>
 
+        <section class="controls__card controls__card--splash" aria-labelledby="splash-heading">
+          <h2 id="splash-heading">Mynd / myndband á borð</h2>
+          <p class="controls__splash-hint" id="splashLibraryHint">Hleð safni…</p>
+          <div class="controls__field">
+            <label class="controls__label" for="splashAssetSelect">Skrá úr safni</label>
+            <select id="splashAssetSelect" class="controls__select"></select>
+          </div>
+          <div class="controls__announce-row">
+            <div class="controls__field controls__field--grow">
+              <label class="controls__label" for="splashDurationSelect">Lengd (aðeins mynd)</label>
+              <select id="splashDurationSelect" class="controls__select">
+                <option value="5">5 sekúndur</option>
+                <option value="10">10 sekúndur</option>
+                <option value="15" selected>15 sekúndur</option>
+                <option value="20">20 sekúndur</option>
+                <option value="30">30 sekúndur</option>
+                <option value="45">45 sekúndur</option>
+                <option value="60">60 sekúndur</option>
+              </select>
+            </div>
+            <button type="button" class="controls__btn controls__btn--resume controls__btn--announce-play" id="btnPlaySplash">Birta á borði</button>
+          </div>
+          <p class="controls__splash-video-note" id="splashVideoNote" hidden>Myndband spilar alla leið — lengd er læst við lengd skráar.</p>
+        </section>
+
         <section class="controls__card controls__card--intro-launch" aria-labelledby="intro-launch-heading">
           <h2 id="intro-launch-heading">Kynningar</h2>
           <p class="controls__intro-launch-hint">Haka við hver á leikjaplatta (liðslista), raða með drætti, og stjórna kynningu undir.</p>
@@ -1222,8 +1264,14 @@
       var announceMessageInput = document.getElementById("announceMessageInput");
       var announceDurationSelect = document.getElementById("announceDurationSelect");
       var btnPlayAnnounce = document.getElementById("btnPlayAnnounce");
+      var splashLibraryHint = document.getElementById("splashLibraryHint");
+      var splashAssetSelect = document.getElementById("splashAssetSelect");
+      var splashDurationSelect = document.getElementById("splashDurationSelect");
+      var splashVideoNote = document.getElementById("splashVideoNote");
+      var btnPlaySplash = document.getElementById("btnPlaySplash");
 
       var rosterByTeam = STIGATAFLA_ROSTERS_DEFAULT;
+      var splashLibraryItems = [];
       var mediaPlayer = StigataflaPlayerMedia.createPlayerMediaPlayer({
         overlay: document.getElementById("playerMediaOverlay"),
         video: document.getElementById("playerMediaVideo"),
@@ -1281,6 +1329,94 @@
         });
         var ms = Math.max(1, durationSec) * 1000;
         announceHideTimer = setTimeout(hideTextAnnouncement, ms);
+      }
+
+      function normalizeSplashItemsFromJson(j) {
+        var raw = j && j.items;
+        if (!raw || !Array.isArray(raw)) return [];
+        var out = [];
+        for (var i = 0; i < raw.length; i++) {
+          var row = raw[i];
+          if (!row || typeof row !== "object") continue;
+          var url = row.url != null ? String(row.url).trim() : "";
+          if (!url) continue;
+          var kind = row.kind === "video" ? "video" : row.kind === "image" ? "image" : null;
+          if (!kind) kind = StigataflaPlayerMedia.mediaKindFromUrl(url) === "video" ? "video" : "image";
+          var label = row.label != null ? String(row.label) : "";
+          out.push({ id: String(row.id != null ? row.id : "sp_" + i), url: url, kind: kind, label: label });
+        }
+        return out;
+      }
+
+      function populateSplashAssetSelect() {
+        if (!splashAssetSelect) return;
+        splashAssetSelect.innerHTML = "";
+        var ph = document.createElement("option");
+        ph.value = "";
+        ph.textContent = "— Veldu skrá —";
+        splashAssetSelect.appendChild(ph);
+        for (var i = 0; i < splashLibraryItems.length; i++) {
+          var it = splashLibraryItems[i];
+          var opt = document.createElement("option");
+          opt.value = it.url;
+          opt.setAttribute("data-kind", it.kind);
+          var lab = it.label && String(it.label).trim() ? String(it.label).trim() : it.kind === "video" ? "Myndband" : "Mynd";
+          opt.textContent = lab + " (" + (i + 1) + ")";
+          splashAssetSelect.appendChild(opt);
+        }
+        syncSplashDurationForSelection();
+        syncSplashPlayEnabled();
+      }
+
+      function syncSplashDurationForSelection() {
+        if (!splashAssetSelect || !splashDurationSelect || !splashVideoNote) return;
+        var opt = splashAssetSelect.selectedOptions[0];
+        var isVideo = opt && opt.getAttribute("data-kind") === "video";
+        splashDurationSelect.disabled = !!isVideo;
+        splashVideoNote.hidden = !isVideo;
+      }
+
+      function syncSplashPlayEnabled() {
+        if (!btnPlaySplash || !splashAssetSelect) return;
+        var v = splashAssetSelect.value;
+        btnPlaySplash.disabled = !v || !String(v).trim();
+      }
+
+      function fetchSplashLibrary() {
+        splashLibraryItems = [];
+        if (splashLibraryHint) splashLibraryHint.textContent = "Hleð safni…";
+        var cfg = window.STIGATAFLA_CONFIG;
+        var u = cfg && cfg.splashKrUrl != null ? String(cfg.splashKrUrl).trim() : "";
+        if (!u) {
+          if (splashLibraryHint) {
+            splashLibraryHint.textContent =
+              "Engin slóð að splash-safni — bættu splashKrUrl í stigatafla.config.js ef þú notar þennan eiginleika.";
+          }
+          populateSplashAssetSelect();
+          return Promise.resolve();
+        }
+        return fetch(u, { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+          })
+          .then(function (j) {
+            splashLibraryItems = normalizeSplashItemsFromJson(j);
+            if (splashLibraryHint) {
+              splashLibraryHint.textContent =
+                splashLibraryItems.length === 0
+                  ? "Ekkert í safninu — bættu skrám við í Leikmannastillingar."
+                  : splashLibraryItems.length + " skrár í safni.";
+            }
+            populateSplashAssetSelect();
+          })
+          .catch(function (err) {
+            console.warn("[Stigatafla] splashKr:", err);
+            if (splashLibraryHint) {
+              splashLibraryHint.textContent = "Gat ekki hlaðað safninu — athugaðu splashKrUrl eða net.";
+            }
+            populateSplashAssetSelect();
+          });
       }
 
       function applyPresentationFromState() {
@@ -1911,6 +2047,27 @@
         });
       }
 
+      if (splashAssetSelect) {
+        splashAssetSelect.addEventListener("change", function () {
+          syncSplashDurationForSelection();
+          syncSplashPlayEnabled();
+        });
+      }
+      if (btnPlaySplash) {
+        btnPlaySplash.addEventListener("click", function () {
+          if (!splashAssetSelect || !splashDurationSelect) return;
+          var url = splashAssetSelect.value;
+          if (!url || !String(url).trim()) return;
+          if (!goalPickerBackdrop.hidden) closeGoalPicker();
+          mediaPlayer.cancel();
+          hideTextAnnouncement();
+          var sec = parseInt(splashDurationSelect.value, 10);
+          if (!(sec > 0)) sec = 15;
+          var ms = sec * 1000;
+          mediaPlayer.playOverlayOnce(String(url).trim(), ms, function () {});
+        });
+      }
+
       function bootScoreboard() {
         setInterval(maybeSwitchOvernightClock, 60000);
         maybeSwitchOvernightClock();
@@ -1944,6 +2101,9 @@
             (err && err.message) || err,
             STIGATAFLA_CONFIG && STIGATAFLA_CONFIG.rostersUrl
           );
+        })
+        .then(function () {
+          return fetchSplashLibrary();
         })
         .then(function () {
           bootScoreboard();

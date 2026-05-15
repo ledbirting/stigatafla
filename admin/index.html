@@ -196,6 +196,39 @@
     .player-card__actions { display: flex; align-items: flex-start; padding-top: 24px; }
     .add-panel { margin-top: 8px; padding: 18px; background: var(--card-inner); border: 1px solid var(--border); border-radius: 14px; }
     a { color: #64a8ff; }
+    .splash-kr-panel { margin-bottom: 20px; }
+    .splash-kr-rows { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+    .splash-kr-row {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 12px 14px;
+      align-items: start;
+      padding: 14px 16px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    @media (max-width: 640px) {
+      .splash-kr-row { grid-template-columns: 1fr; }
+    }
+    .splash-kr-row__thumb {
+      width: 100px;
+      height: 72px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0c0c0e;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      padding: 6px;
+      line-height: 1.25;
+    }
+    .splash-kr-row__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   </style>
 </head>
 <body>
@@ -248,6 +281,18 @@
         <button type="button" data-team="keflavik" id="tabKef">Keflavík</button>
       </div>
 
+      <div id="splashKrPanel" class="splash-kr-panel" hidden>
+        <h2 style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Myndir / myndbönd á borð (KR)</h2>
+        <p class="sub" style="margin:0 0 14px">Skrár birtast í völdu safni á KR stigatöflu. Mynd: stjórnandi velur lengd. Myndband: spilað til enda (læst).</p>
+        <div class="row" style="margin-bottom:0">
+          <div class="field" style="flex:1;min-width:200px">
+            <label for="splashKrUpload">Hlaða upp</label>
+            <input id="splashKrUpload" type="file" accept="image/*,video/*" />
+          </div>
+        </div>
+        <div id="splashKrRows" class="splash-kr-rows"></div>
+      </div>
+
       <h2>Leikmenn / starfsfólk</h2>
       <div id="playerList" class="player-list"></div>
 
@@ -280,6 +325,8 @@
       bucket: "stigatafla",
       rostersPath: "stigatafla/rosters.json",
       mediaPathPrefix: "stigatafla/media",
+      splashKrPath: "stigatafla/splash-kr.json",
+      splashKrMediaPrefix: "stigatafla/media/kr/splash",
     };
   </script>
   <script
@@ -340,6 +387,7 @@
     let rosterData = { kr: [], keflavik: [] };
     let currentTeam = "kr";
     let rosterLoadedOnce = false;
+    let splashLibraryKr = [];
 
     const $ = (id) => document.getElementById(id);
 
@@ -365,6 +413,10 @@
     }
 
     cfg = window.STIGATAFLA_ADMIN_CONFIG;
+    if (cfg) {
+      if (!cfg.splashKrPath) cfg.splashKrPath = "stigatafla/splash-kr.json";
+      if (!cfg.splashKrMediaPrefix) cfg.splashKrMediaPrefix = "stigatafla/media/kr/splash";
+    }
     if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
       $("configMissing").hidden = false;
       $("loginCard").hidden = true;
@@ -489,6 +541,7 @@
           ROSTER_LOAD_TIMEOUT_MS,
           ROSTER_LOAD_TIMEOUT_MSG
         );
+        await loadSplashKrFromStorage();
         render();
         if (!fromSeed) showStatus("", false);
       } catch (e) {
@@ -504,7 +557,55 @@
         .from(cfg.bucket)
         .upload(cfg.rostersPath, blob, { contentType: "application/json; charset=utf-8", upsert: true });
       if (error) throw error;
-      showStatus("Vistað í " + cfg.rostersPath, false);
+    }
+
+    function newSplashId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+      return "sp_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    }
+
+    function normalizeSplashLibraryItem(row) {
+      if (!row || typeof row !== "object") return null;
+      const url = row.url ? String(row.url).trim() : "";
+      if (!url) return null;
+      let kind = row.kind;
+      if (kind !== "image" && kind !== "video") kind = mediaKindFromUrl(url) === "video" ? "video" : "image";
+      return {
+        id: row.id != null && String(row.id).trim() ? String(row.id) : newSplashId(),
+        label: row.label != null ? String(row.label) : "",
+        url,
+        kind,
+        storagePath: row.storagePath ? String(row.storagePath) : "",
+      };
+    }
+
+    async function loadSplashKrFromStorage() {
+      splashLibraryKr = [];
+      if (!supabase || !cfg || !cfg.splashKrPath) return;
+      const { data: blob, error } = await supabase.storage.from(cfg.bucket).download(cfg.splashKrPath);
+      if (error) {
+        if (isRosterObjectMissingError(error)) return;
+        console.warn("splash-kr:", error);
+        return;
+      }
+      try {
+        const text = await blob.text();
+        const j = JSON.parse(text);
+        const items = Array.isArray(j && j.items) ? j.items : [];
+        splashLibraryKr = items.map(normalizeSplashLibraryItem).filter(Boolean);
+      } catch (e) {
+        console.warn("splash-kr parse", e);
+      }
+    }
+
+    async function saveSplashKrToStorage() {
+      if (!supabase || !cfg || !cfg.splashKrPath) return;
+      const payload = JSON.stringify({ version: 1, items: splashLibraryKr }, null, 2);
+      const blob = new Blob([payload], { type: "application/json; charset=utf-8" });
+      const { error } = await supabase.storage
+        .from(cfg.bucket)
+        .upload(cfg.splashKrPath, blob, { contentType: "application/json; charset=utf-8", upsert: true });
+      if (error) throw error;
     }
 
     function currentList() {
@@ -688,6 +789,133 @@
         b.addEventListener("click", onDeletePlayer);
       });
       wireLazyMediaPreviews(host);
+      renderSplashKrPanel();
+    }
+
+    function renderSplashKrPanel() {
+      const panel = $("splashKrPanel");
+      const host = $("splashKrRows");
+      if (!panel || !host) return;
+      panel.hidden = currentTeam !== "kr";
+      if (panel.hidden) return;
+      host.innerHTML = "";
+      for (const item of splashLibraryKr) {
+        const row = document.createElement("div");
+        row.className = "splash-kr-row";
+        const thumb = document.createElement("div");
+        thumb.className = "splash-kr-row__thumb";
+        if (item.kind === "video") {
+          thumb.textContent = "Myndband";
+        } else {
+          const img = document.createElement("img");
+          img.src = item.url;
+          img.alt = "";
+          img.loading = "lazy";
+          img.addEventListener(
+            "error",
+            () => {
+              thumb.textContent = "Mynd";
+              img.remove();
+            },
+            { once: true }
+          );
+          thumb.appendChild(img);
+        }
+        const mid = document.createElement("div");
+        mid.style.minWidth = "0";
+        const lab = document.createElement("label");
+        lab.textContent = "Heiti (valfrjálst)";
+        lab.style.display = "block";
+        lab.style.marginBottom = "4px";
+        lab.style.fontSize = "12px";
+        lab.style.fontWeight = "600";
+        lab.style.color = "#c7c7cc";
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.value = item.label;
+        inp.placeholder = "t.d. Kynnir";
+        inp.style.width = "100%";
+        inp.style.maxWidth = "420px";
+        inp.addEventListener("change", async () => {
+          item.label = inp.value;
+          if (!supabase) return;
+          try {
+            await saveSplashKrToStorage();
+            showStatus("Splash-safn vistað.", false);
+          } catch (e) {
+            showStatus(String(e && e.message ? e.message : e), true);
+          }
+        });
+        const hint = document.createElement("small");
+        hint.style.display = "block";
+        hint.style.marginTop = "6px";
+        hint.style.color = "var(--muted)";
+        const a = document.createElement("a");
+        a.href = item.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Opna skrá";
+        hint.appendChild(a);
+        mid.appendChild(lab);
+        mid.appendChild(inp);
+        mid.appendChild(hint);
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "btn-danger";
+        del.textContent = "Eyða";
+        del.addEventListener("click", () => deleteSplashKrItem(item.id));
+        row.appendChild(thumb);
+        row.appendChild(mid);
+        row.appendChild(del);
+        host.appendChild(row);
+      }
+    }
+
+    async function deleteSplashKrItem(id) {
+      if (!supabase) return;
+      const item = splashLibraryKr.find((x) => x.id === id);
+      if (!item || !confirm("Eyða þessari skrá úr safni og geymslu?")) return;
+      if (item.storagePath) {
+        await supabase.storage.from(cfg.bucket).remove([item.storagePath]).catch(() => {});
+      }
+      splashLibraryKr = splashLibraryKr.filter((x) => x.id !== id);
+      try {
+        await saveSplashKrToStorage();
+        showStatus("Splash-safn uppfært.", false);
+      } catch (e) {
+        showStatus(String(e && e.message ? e.message : e), true);
+      }
+      renderSplashKrPanel();
+    }
+
+    async function onSplashKrFileChange(e) {
+      const inp = e.target;
+      const file = inp.files && inp.files[0];
+      inp.value = "";
+      if (!file || !supabase || currentTeam !== "kr") return;
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+      const nid = newSplashId();
+      const path = `${cfg.splashKrMediaPrefix}/${nid}.${safeExt}`;
+      showStatus("Hleð splash-skrá…", false);
+      const { error: upErr } = await supabase.storage.from(cfg.bucket).upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: true,
+      });
+      if (upErr) {
+        showStatus(upErr.message, true);
+        return;
+      }
+      const url = publicUrlForPath(path);
+      const kind = mediaKindFromUrl(url) === "video" ? "video" : "image";
+      splashLibraryKr.push({ id: nid, label: "", url, kind, storagePath: path });
+      try {
+        await saveSplashKrToStorage();
+        showStatus("Splash-safn vistað (" + cfg.splashKrPath + ").", false);
+      } catch (err) {
+        showStatus(String(err && err.message ? err.message : err), true);
+      }
+      renderSplashKrPanel();
     }
 
     function escapeAttr(s) {
@@ -823,10 +1051,14 @@
       showStatus("Vista…", false);
       try {
         await saveRostersToStorage();
+        await saveSplashKrToStorage();
+        showStatus("Vistað: " + cfg.rostersPath + " og " + cfg.splashKrPath + ".", false);
       } catch (err) {
         showStatus(String(err && err.message ? err.message : err), true);
       }
     });
+
+    $("splashKrUpload")?.addEventListener("change", onSplashKrFileChange);
 
     $("loginForm")?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
