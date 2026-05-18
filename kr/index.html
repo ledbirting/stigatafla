@@ -1226,9 +1226,8 @@
         </section>
         </div>
       </div>
-    </div>
 
-  <div id="introPanelBackdrop" class="intro-panel-backdrop" hidden>
+      <div id="introPanelBackdrop" class="intro-panel-backdrop" hidden>
     <div class="intro-panel" role="dialog" aria-modal="true" aria-labelledby="introPanelTitle" aria-describedby="introPanelDesc">
       <div class="intro-panel__header">
         <h2 id="introPanelTitle">Kynningar</h2>
@@ -1290,6 +1289,8 @@
     </div>
   </div>
 
+    </div>
+
   </div>
 
   <script src="../teams.js"></script>
@@ -1328,6 +1329,10 @@
         "https://media.zapp.is/storage/v1/object/public/stigatafla/kr/KR-Sub-Off-Overlay.png";
       var KR_SUB_OVERLAY_ON =
         "https://media.zapp.is/storage/v1/object/public/stigatafla/kr/KR-Sub-On-Overlay.png";
+      /** Full-screen „Skipting“ graphic before off/on player slides. */
+      var KR_SUB_INTRO_URL =
+        "https://media.zapp.is/storage/v1/object/public/stigatafla/kr/KR-Skipting-Graphic.jpg";
+      var KR_SUB_INTRO_MS = 7000;
       var KR_SUB_HOLD_MS = 4800;
 
       function teamIdForGoalSide(side) {
@@ -1895,6 +1900,7 @@
         subAnimGen += 1;
         clearSubAnimTimeouts();
         cleanupSubOverlay();
+        mediaPlayer.cancel();
       }
 
       function getKrSubEligiblePlayers() {
@@ -2006,10 +2012,12 @@
 
         if (!overlay || !video || !mainImg || !subWrap || !frame || !base || !ovImg) return;
 
-        video.style.display = "none";
-        mainImg.style.display = "none";
+        function playSubOffOnSlides() {
+          if (my !== subAnimGen) return;
+          video.style.display = "none";
+          mainImg.style.display = "none";
 
-        Promise.all([loadImgEl(base, offIntroUrl), loadImgEl(ovImg, KR_SUB_OVERLAY_OFF)])
+          Promise.all([loadImgEl(base, offIntroUrl), loadImgEl(ovImg, KR_SUB_OVERLAY_OFF)])
           .then(
             guard(function () {
               subWrap.hidden = false;
@@ -2093,6 +2101,9 @@
               window.alert("Ekki tókst að hlaða myndum fyrir skipti.");
             })
           );
+        }
+
+        mediaPlayer.playOverlayOnce(KR_SUB_INTRO_URL, KR_SUB_INTRO_MS, guard(playSubOffOnSlides));
       }
 
       function renderIntroPanelLists() {
