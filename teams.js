@@ -8,6 +8,7 @@
     { id: "afturelding", name: "Afturelding", badgeUrl: B + "Afturelding-F.png" },
     { id: "breidablik", name: "Breiðablik", badgeUrl: B + "Breidablik.png" },
     { id: "fh", name: "FH", badgeUrl: B + "FH-F.png" },
+    { id: "fhl", name: "FHL", badgeUrl: B + "fhl2.png" },
     { id: "fjolnir", name: "Fjölnir", badgeUrl: B + "Fjolnir.png" },
     { id: "fram", name: "Fram", badgeUrl: B + "Fram.png" },
     { id: "fylkir", name: "Fylkir", badgeUrl: B + "Fylkir.png" },
